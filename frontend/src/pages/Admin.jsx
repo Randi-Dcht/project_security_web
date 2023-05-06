@@ -1,4 +1,4 @@
-const Logger = () =>
+const Admin = () =>
 {
     return(
         <div>
@@ -6,4 +6,4 @@ const Logger = () =>
         </div>
     )
 }
-export default Logger;
+export default Admin;
