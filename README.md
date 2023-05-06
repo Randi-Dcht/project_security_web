@@ -1,5 +1,26 @@
 # cybersecurity project
 
+## Run project :
+
+- Frontend :
+
+> cd frontend
+> 
+> npm install
+> 
+> npm run dev
+
+- Backend :
+
+> cd .
+> 
+> symfony server:start
+
+- for check security in backend:
+
+> symfony check:security
+
+
 ## Information
 
 - We will use `open ssl`
