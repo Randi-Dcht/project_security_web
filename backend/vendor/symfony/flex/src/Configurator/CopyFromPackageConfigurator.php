@@ -118,7 +118,7 @@ class CopyFromPackageConfigurator extends AbstractConfigurator
      */
     public function copyFile(string $source, string $target, array $options)
     {
-        $target = $this->options->get('root-dir').'/'.$target;
+        $target = $this->options->get('root-dir') . 'CopyFromPackageConfigurator.php/' .$target;
         if (is_dir($source)) {
             // directory will be created when a file is copied to it
             return;

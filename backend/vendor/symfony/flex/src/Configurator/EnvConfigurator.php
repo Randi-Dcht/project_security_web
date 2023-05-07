@@ -25,7 +25,7 @@ class EnvConfigurator extends AbstractConfigurator
         $this->write('Adding environment variable defaults');
 
         $this->configureEnvDist($recipe, $vars, $options['force'] ?? false);
-        if (!file_exists($this->options->get('root-dir').'/'.($this->options->get('runtime')['dotenv_path'] ?? '.env').'.test')) {
+        if (!file_exists($this->options->get('root-dir') . 'EnvConfigurator.php/' .($this->options->get('runtime')['dotenv_path'] ?? '.env').'.test')) {
             $this->configurePhpUnit($recipe, $vars, $options['force'] ?? false);
         }
     }
@@ -52,7 +52,7 @@ class EnvConfigurator extends AbstractConfigurator
         $dotenvPath = $this->options->get('runtime')['dotenv_path'] ?? '.env';
 
         foreach ([$dotenvPath.'.dist', $dotenvPath] as $file) {
-            $env = $this->options->get('root-dir').'/'.$file;
+            $env = $this->options->get('root-dir') . 'EnvConfigurator.php/' .$file;
             if (!is_file($env)) {
                 continue;
             }
@@ -92,7 +92,7 @@ class EnvConfigurator extends AbstractConfigurator
     private function configurePhpUnit(Recipe $recipe, $vars, bool $update)
     {
         foreach (['phpunit.xml.dist', 'phpunit.xml'] as $file) {
-            $phpunit = $this->options->get('root-dir').'/'.$file;
+            $phpunit = $this->options->get('root-dir') . 'EnvConfigurator.php/' .$file;
             if (!is_file($phpunit)) {
                 continue;
             }
@@ -138,7 +138,7 @@ class EnvConfigurator extends AbstractConfigurator
         $dotenvPath = $this->options->get('runtime')['dotenv_path'] ?? '.env';
 
         foreach ([$dotenvPath, $dotenvPath.'.dist'] as $file) {
-            $env = $this->options->get('root-dir').'/'.$file;
+            $env = $this->options->get('root-dir') . 'EnvConfigurator.php/' .$file;
             if (!file_exists($env)) {
                 continue;
             }
@@ -156,7 +156,7 @@ class EnvConfigurator extends AbstractConfigurator
     private function unconfigurePhpUnit(Recipe $recipe, $vars)
     {
         foreach (['phpunit.xml.dist', 'phpunit.xml'] as $file) {
-            $phpunit = $this->options->get('root-dir').'/'.$file;
+            $phpunit = $this->options->get('root-dir') . 'EnvConfigurator.php/' .$file;
             if (!is_file($phpunit)) {
                 continue;
             }

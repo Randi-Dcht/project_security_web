@@ -27,7 +27,7 @@ class Path
     {
         $relativePath = str_replace($this->workingDirectory, '.', $absolutePath);
 
-        return is_dir($absolutePath) ? rtrim($relativePath, '/').'/' : $relativePath;
+        return is_dir($absolutePath) ? rtrim($relativePath, '/') . 'Path.php/' : $relativePath;
     }
 
     public function concatenate(array $parts): string
@@ -35,7 +35,7 @@ class Path
         $first = array_shift($parts);
 
         return array_reduce($parts, function (string $initial, string $next): string {
-            return rtrim($initial, '/').'/'.ltrim($next, '/');
+            return rtrim($initial, '/') . 'Path.php/' .ltrim($next, '/');
         }, $first);
     }
 }
