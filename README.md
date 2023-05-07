@@ -2,7 +2,7 @@
 
 ## Run project :
 
-- Frontend :
+### Frontend :
 
 > cd frontend
 > 
@@ -10,29 +10,13 @@
 > 
 > npm run dev
 
-- Backend :
+### Backend :
 
 > cd backend/
 > 
 > symfony server:start
 
-- for check security in backend:
+### for check security in backend:
 
 > symfony check:security
 
-
-## Information
-
-- We will use `open ssl`
-- client / server access (pc to connect)
-- access on several machines
-
-## Library
-```
-conda install -c conda-forge pycryptodome
-conda install -c anaconda cryptography
-```
-
-## Presentation
-
-Individual project presentation
