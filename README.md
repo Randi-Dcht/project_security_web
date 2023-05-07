@@ -12,7 +12,7 @@
 
 - Backend :
 
-> cd .
+> cd backend/
 > 
 > symfony server:start
 
