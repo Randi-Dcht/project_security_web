@@ -3,6 +3,7 @@
 *.zip
 *.iml
 *.pdf
+*.odt
 
 # Configuration
 .github
