@@ -1,0 +1,9 @@
+version: '1.0'
+
+services:
+
+  front:
+    image: frontend:latest
+    build: ./frontEnd/
+    container_name: front
+    restart: unless-stopped
