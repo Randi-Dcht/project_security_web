@@ -44,7 +44,7 @@ class UsersController extends AbstractController
 
     public function addUser(UsersRepository $usersRepository, Request $request, SerializerInterface $serializer, string $role): void
     {
-        //TODO check all value !! (injection or bad value to logger !!!)
+        //TODO check all value !! (injection or bad value to logger !!!) #security
         $req = $serializer->deserialize($request->getContent(), Users::class, 'json');
         $req->setRole($role);
         $usersRepository->save($req, true);
