@@ -23,8 +23,8 @@ class Users
     #[ORM\Column]
     private ?int $numberId = null;
 
-    #[ORM\Column(type: Types::DATE_MUTABLE)]
-    private ?\DateTimeInterface $dateSignUp = null;
+    #[ORM\Column(length: 255)]
+    private ?string $dateSignUp = null;
 
     public function getId(): ?int
     {
@@ -67,12 +67,12 @@ class Users
         return $this;
     }
 
-    public function getDateSignUp(): ?\DateTimeInterface
+    public function getDateSignUp(): ?string
     {
         return $this->dateSignUp;
     }
 
-    public function setDateSignUp(\DateTimeInterface $dateSignUp): self
+    public function setDateSignUp(string $dateSignUp): self
     {
         $this->dateSignUp = $dateSignUp;
 
