@@ -30,6 +30,12 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255)]
     private ?string $dateSignUp = null;
 
+    #[ORM\Column(length: 255)]
+    private ?string $name = null;
+
+    #[ORM\Column(length: 255)]
+    private ?string $mail = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -108,6 +114,30 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
     public function setDateSignUp(string $dateSignUp): self
     {
         $this->dateSignUp = $dateSignUp;
+
+        return $this;
+    }
+
+    public function getName(): ?string
+    {
+        return $this->name;
+    }
+
+    public function setName(string $name): self
+    {
+        $this->name = $name;
+
+        return $this;
+    }
+
+    public function getMail(): ?string
+    {
+        return $this->mail;
+    }
+
+    public function setMail(string $mail): self
+    {
+        $this->mail = $mail;
 
         return $this;
     }
