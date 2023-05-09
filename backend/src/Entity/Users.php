@@ -3,71 +3,101 @@
 namespace App\Entity;
 
 use App\Repository\UsersRepository;
-use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: UsersRepository::class)]
-class Users
+class Users implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $name = null;
-
-    #[ORM\Column(length: 255)]
-    private ?string $surname = null;
+    #[ORM\Column(length: 180, unique: true)]
+    private ?string $uuid = null;
 
     #[ORM\Column]
-    private ?int $numberId = null;
+    private array $roles = [];
+
+    /**
+     * @var string The hashed password
+     */
+    #[ORM\Column]
+    private ?string $password = null;
 
     #[ORM\Column(length: 255)]
     private ?string $dateSignUp = null;
-
-    #[ORM\Column(length: 255)]
-    private ?string $role = null;
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getName(): ?string
+    public function getUuid(): ?string
     {
-        return $this->name;
+        return $this->uuid;
     }
 
-    public function setName(string $name): self
+    public function setUuid(string $uuid): self
     {
-        $this->name = $name;
+        $this->uuid = $uuid;
 
         return $this;
     }
 
-    public function getSurname(): ?string
+    /**
+     * A visual identifier that represents this user.
+     *
+     * @see UserInterface
+     */
+    public function getUserIdentifier(): string
     {
-        return $this->surname;
+        return (string) $this->uuid;
     }
 
-    public function setSurname(string $surname): self
+    /**
+     * @see UserInterface
+     */
+    public function getRoles(): array
     {
-        $this->surname = $surname;
+        $roles = $this->roles;
+        // guarantee every user at least has ROLE_USER
+        $roles[] = 'ROLE_USER';
+
+        return array_unique($roles);
+    }
+
+    public function setRoles(array $roles): self
+    {
+        $this->roles = $roles;
 
         return $this;
     }
 
-    public function getNumberId(): ?int
+    /**
+     * @see PasswordAuthenticatedUserInterface
+     */
+    public function getPassword(): string
     {
-        return $this->numberId;
+        return $this->password;
     }
 
-    public function setNumberId(int $numberId): self
+    public function setPassword(string $password): self
     {
-        $this->numberId = $numberId;
+        $this->password = $password;
 
         return $this;
+    }
+
+    /**
+     * @see UserInterface
+     */
+    public function eraseCredentials()
+    {
+        // If you store any temporary, sensitive data on the user, clear it here
+        // $this->plainPassword = null;
     }
 
     public function getDateSignUp(): ?string
@@ -78,21 +108,6 @@ class Users
     public function setDateSignUp(string $dateSignUp): self
     {
         $this->dateSignUp = $dateSignUp;
-
-        return $this;
-    }
-
-    public function getRole(): ?string
-    {
-        return $this->role;
-    }
-
-    public function setRole(string $role): self
-    {
-        if ($role === 'DOCTOR' || $role === 'PATIENT')
-            $this->role = $role;
-        else
-            $this->role = 'PATIENT';
 
         return $this;
     }
