@@ -28,13 +28,26 @@ class UsersController extends AbstractController
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 
-    #[Route('/users/add', name: 'users_create', methods: ['POST'])]
-    public function createUser(UsersRepository $usersRepository, Request $request, SerializerInterface $serializer): JsonResponse
+    #[Route('/patient/add', name: 'patient_create', methods: ['POST'])]
+    public function addPatient(UsersRepository $usersRepository, Request $request, SerializerInterface $serializer): JsonResponse
+    {
+        $this->addUser($usersRepository, $request, $serializer, "PATIENT");
+        return new JsonResponse(null, Response::HTTP_CREATED);
+    }
+
+    #[Route('/doctor/add', name: 'doctor_create', methods: ['POST'])]
+    public function addDoctor(UsersRepository $usersRepository, Request $request, SerializerInterface $serializer): JsonResponse
+    {
+        $this->addUser($usersRepository, $request, $serializer, "DOCTOR");
+        return new JsonResponse(null, Response::HTTP_CREATED);
+    }
+
+    public function addUser(UsersRepository $usersRepository, Request $request, SerializerInterface $serializer, string $role): void
     {
         //TODO check all value !! (injection or bad value to logger !!!)
         $req = $serializer->deserialize($request->getContent(), Users::class, 'json');
+        $req->setRole($role);
         $usersRepository->save($req, true);
-        return new JsonResponse(null, Response::HTTP_CREATED);
     }
 
 
