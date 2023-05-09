@@ -26,6 +26,9 @@ class Users
     #[ORM\Column(length: 255)]
     private ?string $dateSignUp = null;
 
+    #[ORM\Column(length: 255)]
+    private ?string $role = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -75,6 +78,21 @@ class Users
     public function setDateSignUp(string $dateSignUp): self
     {
         $this->dateSignUp = $dateSignUp;
+
+        return $this;
+    }
+
+    public function getRole(): ?string
+    {
+        return $this->role;
+    }
+
+    public function setRole(string $role): self
+    {
+        if ($role === 'DOCTOR' || $role === 'PATIENT')
+            $this->role = $role;
+        else
+            $this->role = 'PATIENT';
 
         return $this;
     }
