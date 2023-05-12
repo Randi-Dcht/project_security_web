@@ -51,6 +51,7 @@ class UsersController extends AbstractController
         $req = $serializer->deserialize($request->getContent(), Users::class, 'json');
         $req->setUuid($myId);
         $req->setRoles([$role]);
+        $req->setDateSignUp(time());
         $usersRepository->save($req, true);
     }
 
