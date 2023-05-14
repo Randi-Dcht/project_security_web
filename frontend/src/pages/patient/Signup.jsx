@@ -5,9 +5,9 @@ import '../../styles/Field.css';
 
 const Signup = () =>
 {
-    const [selectedDate, setSelectedDate] = useState(null);
-    const [registerNumber, setRegisterNumber] = useState(null);
-    const registerNumberRef = useRef(null);
+    const [selectedDate, setSelectedDate] = useState('');
+    const [registerNumber, setRegisterNumber] = useState('');
+    const registerNumberRef = useRef('');
 
     const handleRegisterNumberChange = (event) => {
         const input = event.target.value;
