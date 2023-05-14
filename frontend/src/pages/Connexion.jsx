@@ -31,7 +31,7 @@ const Connexion = () => {
 
         // TODO : vérifier le type de compte (patient/médecin/admin)
 
-        navigate('/user');
+        navigate('/doctor');
     };
 
     return (
