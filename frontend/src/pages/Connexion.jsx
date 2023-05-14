@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import {useNavigate} from "react-router-dom";
 
 const Connexion = () => {
+    const navigate = useNavigate();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
@@ -27,7 +29,9 @@ const Connexion = () => {
         console.log('Email:', email);
         console.log('Mot de passe:', password);
 
+        // TODO : vérifier le type de compte (patient/médecin/admin)
 
+        navigate('/user');
     };
 
     return (

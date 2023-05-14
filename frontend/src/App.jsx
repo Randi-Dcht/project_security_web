@@ -7,7 +7,7 @@ import Connexion from "./pages/Connexion.jsx";
 import Signup from "./pages/patient/Signup.jsx";
 import Profil from './pages/patient/Profil';
 import Admin from "./pages/Admin.jsx";
-import Users from "./pages/Users.jsx";
+import UserPage from './pages/UserPage.jsx';
 
 function App() {
   const [count, setCount] = useState(0)
@@ -21,7 +21,7 @@ function App() {
                 <Route exact path="/signup" element={<Signup/>}/>
                 <Route exact path='/profil' element={<Profil/>}/>
                 <Route exact path="/admin" element={<Admin/>}/>
-                <Route exact path="/user" element={<Users/>}/>
+                <Route exact path="/user" element={<UserPage/>}/>
             </Routes>
         </BrowserRouter>
     </div>
