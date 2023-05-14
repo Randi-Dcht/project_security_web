@@ -203,7 +203,7 @@ const Signup = () =>
                 </div>
             </div>
 
-            <button onClick={registerClick}>Test</button>
+            <button onClick={registerClick}>Inscription</button>
         </div>
     )
 }
