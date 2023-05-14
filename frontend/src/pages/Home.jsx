@@ -17,9 +17,7 @@ const Home = () =>
                         
                     </Card.Text>
                     <Stack gap={2} className="col-md-5 mx-auto p-5">
-                        <Button onClick={() => navigate("/admin")} variant="secondary">Je suis un administrateur</Button>
-                        <Button onClick={() => navigate("/")} variant="secondary">Je suis un docteur</Button>
-                        <Button onClick={() => navigate("/connexion")} variant="outline-secondary">Je suis un patient</Button>
+                        <Button onClick={() => navigate("/connexion")} variant="outline-secondary">Connexion</Button>
                     </Stack>
                 </Card.Body>
 
