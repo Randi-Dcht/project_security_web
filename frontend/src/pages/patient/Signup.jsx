@@ -9,6 +9,54 @@ const Signup = () =>
     const [registerNumber, setRegisterNumber] = useState('');
     const registerNumberRef = useRef('');
 
+    const registerClick = () => {
+        // Vérification du format de l'adresse e-mail
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            console.log('Veuillez entrer une adresse e-mail valide.');
+            return;
+        }
+    
+        // Vérification du format du mot de passe
+        const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/;
+        if (!passwordRegex.test(password)) {
+            console.log(
+                'Veuillez entrer un mot de passe d\'au moins 8 caractères, comprenant au moins une lettre minuscule, une lettre majuscule et un chiffre.'
+            );
+            return;
+        }
+    
+        // Vérification de la confirmation du mot de passe
+        if (confirmPassword !== password) {
+            console.log('La confirmation du mot de passe ne correspond pas.');
+            return;
+        }
+    
+        // Vérification du format du nom
+        const nameRegex = /^[a-zA-Z\s]*$/;
+        if (!nameRegex.test(lastName) || !nameRegex.test(firstName)) {
+            console.log('Veuillez entrer des valeurs valides pour le nom et le prénom (lettres et espaces uniquement).');
+            return;
+        }
+    
+        // Vérification de la date de naissance
+        if (!selectedDate) {
+            console.log('Veuillez sélectionner une date de naissance.');
+            return;
+        }
+    
+        // Vérification du format du numéro de registre national
+        const registerNumberRegex = /^\d{2}\.\d{2}\.\d{2}-\d{3}\.\d{2}$/;
+        if (!registerNumberRegex.test(registerNumber)) {
+            console.log('Veuillez entrer un numéro de registre national valide (ex: 00.00.00-000.00).');
+            return;
+        }
+    
+        // TODO : envoyer les données au serveur
+        console.log('Inscription réussie !');
+    };
+    
+
     const handleRegisterNumberChange = (event) => {
         const input = event.target.value;
         const cleanedInput = input.replace(/\D/g, '');
@@ -155,7 +203,7 @@ const Signup = () =>
                 </div>
             </div>
 
-            <button>Créer le compte</button>
+            <button onClick={registerClick}>Test</button>
         </div>
     )
 }
