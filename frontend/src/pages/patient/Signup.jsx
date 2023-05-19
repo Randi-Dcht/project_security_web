@@ -1,4 +1,4 @@
-const Inscription = () =>
+const Signup = () =>
 {
     return(
         <div>
@@ -18,8 +18,8 @@ const Inscription = () =>
                 </div>
             </div>
 
-            <button>inscription</button>
+            <button>Créer le compte</button>
         </div>
     )
 }
-export default Inscription;
+export default Signup;

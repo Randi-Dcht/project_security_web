@@ -11,4 +11,5 @@ Lorsque un docteur demande/recoit l’accès, le patient envoie la/les clé du/d
 
 - https://matrix.org/docs/guides/end-to-end-encryption-implementation-guide
 - https://core.telegram.org/api/end-to-end
+- https://faq.whatsapp.com/820124435853543/?locale=fr_FR
  
