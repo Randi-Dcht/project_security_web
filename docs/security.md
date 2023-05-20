@@ -1,5 +1,41 @@
 # Project Health's : security
 
+Any submission must include a report under PDF format detailing your choices regarding
+security : `with typst`
+
+Check-list
+1. Do I properly ensure confidentiality?
+   • Are sensitive data transmitted and stored securely?
+   • Are sensitive requests sent to the server transmitted securely?
+   • Do I achieve end-to-end encryption (if relevant)?
+   • Does a system administrator have access to the sensible data of some arbitrary user?
+2. Do I properly ensure integrity of stored data?
+3. Do I properly ensure non-repudiation?
+   • Do I use signature, certificates, a proper authority?
+4. Do I use a proper and strong authentication scheme?
+    • Do I follow OWASP guidelines?
+    • Is my authentication broken (cf. OWASP 10)?
+5. Do my security features rely on secrecy, beyond credentials?
+6. Am I vulnerable to injection?
+   • URL, SQL, Javascript and dedicated parser injections
+7. Am I vulnerable to data remanence attacks?
+8. Am I vulnerable to replay attacks?
+9. Am I vulnerable to fraudulent request forgery?
+10. Am I monitoring enough user activity so that I can immediately detect maliciousor analyse an attack a posteriori?
+    • Do I simply reject invalid entries, or do I analyse them?
+    • Can logs be falsified?
+11. Am I using components with know vulnerabilities?
+12. Is my system updated?
+13. Is my access control broken (cf. OWASP 10)?
+    • Do I use indirect references to resource or functions?
+14. Are my general security features misconfigured (cf. OWASP 10)?
+    Also, note that you will unlinkely graduate should you fail to
+    • use a (at least self-signed) certificate for your server,
+    • use a framework (at least for the server’s side),
+    • achieve end-to-end encryption (if relevant).
+
+---
+
 ## Symphony
 
 ### users
