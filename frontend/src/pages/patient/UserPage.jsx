@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import '../styles/UserPage.css'; // un fichier CSS pour styliser notre composant
+import '../../styles/UserPage.css'; // un fichier CSS pour styliser notre composant
 
 const UserPage = () => {
   const [doctors, setDoctors] = useState(["Dr. Smith", "Dr. Johnson"]);
