@@ -7,31 +7,3 @@ services:
     build: ./frontEnd/
     container_name: front
     restart: unless-stopped
-
-  api:
-    image: backend:latest
-    build: ./Back-End
-    container_name: api
-    restart: unless-stopped
-    depends_on:
-      - db
-    networks:
-      - db
-      - proxy
-      - opti
-
-  proxy:
-      build: ./ngnix/nginx
-      image: proxy:latest
-      container_name: proxy
-      restart: unless-stopped
-      ports:
-        - "80:80"
-        - "443:443"
-      networks:
-        - proxy
-
-
-
-  networks:
-      proxy:
