@@ -33,19 +33,19 @@ scripts)
 
 ### Backend :
 
->  The backend part is available using `cd backend` from the root of this archive.
+>  The backend part is available the backend directory of this repo
 > 
->  You can download and install `symphony` here : https://symfony.com/download
-> 
->  To install `composer` you have to run : `composer install`
-> 
->  To run the server : `symfony server:start`
+> You can follow the instruction in the readme there (you can use Podman or Docker)
 
 ### Init db :
 
-> php bin/console doctrine:database:create
-> php bin/console make:migration
-> php bin/console doctrine:migrations:migrate
+>  php bin/console doctrine:database:create 
+>
+update
+>  php bin/console make:migration 
+>
+>  php bin/console doctrine:migrations:migrate
+
 
 ### for check security in backend:
 
