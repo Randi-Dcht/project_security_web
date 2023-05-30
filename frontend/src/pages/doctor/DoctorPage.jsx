@@ -1,9 +1,16 @@
 import React, { useState } from 'react';
+import '../../styles/DoctorPage.css';
 
 const DoctorPage = () => {
   const [patients, setPatients] = useState(['Patient 1', 'Patient 2', 'Patient 3']);
   const [selectedFile, setSelectedFile] = useState(null);
 
+    const handleDoctorUpdate = () => {
+        // TODO : logique pour modifier les informations de l'utilisateur
+    };
+    const handleSecurityUpdate = () => {
+        // TODO : logique pour modifier les informations lié à la sécurité de l'utilisateur
+    };
   const handleFileUpload = (event) => {
     setSelectedFile(event.target.files[0]);
   };
@@ -15,23 +22,32 @@ const DoctorPage = () => {
   };
 
   return (
-    <div>
+    <div className="doctor-page">
       <h1>Page du médecin</h1>
-
-      <h2>Mes patients</h2>
-      <ul>
-        {patients.map((patient, index) => (
-          <li key={index}>
-            {patient} <button>Voir le dossier médical</button> <button>Supprimer</button>
-          </li>
-        ))}
-      </ul>
+        <section>
+          <h2>Mes informations</h2>
+          <button onClick={handleDoctorUpdate}>Modifier mes informations</button>
+          <br />
+          <button className="red_btn" onClick={handleSecurityUpdate}>Modifier la sécurité</button>
+        </section>
+        <section>
+          <h2>Mes patients</h2>
+          <ul>
+            {patients.map((patient, index) => (
+              <li key={index}>
+                {patient} <button>Voir le dossier médical</button> <button>Supprimer</button>
+              </li>
+            ))}
+          </ul>
+        </section>
+        <section>
 
       <h2>Ajouter un fichier à un dossier médical</h2>
-      <form onSubmit={handleSubmit}>
-        <input type="file" onChange={handleFileUpload} />
-        <button type="submit">Upload</button>
-      </form>
+          <form onSubmit={handleSubmit}>
+            <input type="file" onChange={handleFileUpload} />
+            <button type="submit">Upload</button>
+          </form>
+        </section>
     </div>
   );
 };

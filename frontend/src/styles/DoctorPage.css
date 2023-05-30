@@ -1,0 +1,32 @@
+.doctor-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+    }
+
+  .doctor-page section {
+    width: 100%;
+    border: 1px solid #ccc;
+    padding: 1rem;
+    border-radius: 8px;
+  }
+
+  .doctor-page h2 {
+    text-align: center;
+    color: #333;
+  }
+
+  .doctor-page h1 {
+      text-align: center;
+      color: #333;
+  }
+
+  .doctor-page ul {
+    list-style-type: none;
+    padding: 0;
+  }
+
+  .doctor-page button {
+    margin-left: 1rem;
+  }
