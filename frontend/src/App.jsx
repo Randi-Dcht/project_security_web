@@ -4,7 +4,7 @@ import './styles/App.css'
 import {BrowserRouter, Route, Routes} from "react-router-dom";
 import Home from './pages/Home';
 import Connexion from "./pages/Connexion.jsx";
-import Signup from "./pages/patient/Signup.jsx";
+import Signup from "./pages/Signup.jsx";
 import UserPage from './pages/patient/UserPage.jsx';
 import DoctorPage from './pages/doctor/DoctorPage.jsx';
 import AdminPage from './pages/admin/AdminPage.jsx';
