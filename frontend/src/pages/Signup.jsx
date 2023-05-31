@@ -1,7 +1,8 @@
 import React, { useState, useRef } from 'react';
+import Select from 'react-select';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import '../../styles/Field.css';
+import '../styles/Field.css';
 
 const Signup = () =>
 {
@@ -201,6 +202,20 @@ const Signup = () =>
                     maxLength="14" // Limiter la longueur de l'entrée à 14 caractères (11 chiffres + 3 séparateurs)
                 />
                 </div>
+            </div>
+
+            <div className="field">
+                <label className="label">
+                    Votre rôle
+                </label>
+                <div className='select'>
+                    <select>
+                        <option value="patient">Patient</option>
+                        <option value="doctor">Docteur</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+
             </div>
 
             <button onClick={registerClick}>Inscription</button>
