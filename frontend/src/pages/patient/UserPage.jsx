@@ -36,6 +36,7 @@ const UserPage = () => {
     <div className="user-page">
       <section>
         <h2>Mes informations</h2>
+        <br />
         <button onClick={handleUserUpdate}>Modifier mes informations</button>
         <button class="red_btn" onClick={handleSecurityUpdate}>Modifier la sécurité</button>
       </section>
@@ -49,6 +50,7 @@ const UserPage = () => {
             </li>
           ))}
         </ul>
+        <br />
         <button onClick={handleDoctorAdd}>Ajouter un médecin</button>
       </section>
 
