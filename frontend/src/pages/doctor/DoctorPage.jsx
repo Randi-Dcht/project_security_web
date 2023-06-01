@@ -11,6 +11,10 @@ const DoctorPage = () => {
     const handleSecurityUpdate = () => {
         // TODO : logique pour modifier les informations lié à la sécurité de l'utilisateur
     };
+
+  const handlePatientAdd = () => {
+    // TODO : logique pour ajouter un patient
+  };
   const handleFileUpload = (event) => {
     setSelectedFile(event.target.files[0]);
   };
@@ -26,6 +30,7 @@ const DoctorPage = () => {
       <h1>Page du médecin</h1>
         <section>
           <h2>Mes informations</h2>
+          <br />
           <button onClick={handleDoctorUpdate}>Modifier mes informations</button>
           <br />
           <button className="red_btn" onClick={handleSecurityUpdate}>Modifier la sécurité</button>
@@ -39,6 +44,8 @@ const DoctorPage = () => {
               </li>
             ))}
           </ul>
+          <br />
+          <button onClick={handlePatientAdd}>Ajouter un patient</button>
         </section>
         <section>
 
