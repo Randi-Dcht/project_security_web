@@ -37,6 +37,8 @@ scripts)
 > 
 >   `npm install` to install npm
 > 
+>   `npm install --save react-bootstrap-validation` to install bootstrap
+> 
 >   `npm run dev` to run npm
 >
 
