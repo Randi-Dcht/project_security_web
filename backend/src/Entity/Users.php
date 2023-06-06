@@ -6,11 +6,10 @@ use App\Repository\UsersRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: UsersRepository::class)]
-class Users implements UserInterface, PasswordAuthenticatedUserInterface
+class Users implements UserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -23,20 +22,14 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private array $roles = [];
 
-    /**
-     * @var string The hashed password
-     */
-    #[ORM\Column]
-    private ?string $password = null;
-
     #[ORM\Column(length: 255)]
     private ?string $dateSignUp = null;
 
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $mail = null;
+    #[ORM\Column(length: 255, unique: true)]
+    private ?string $email = null;
 
     #[ORM\ManyToMany(targetEntity: Files::class, mappedBy: 'access')]
     private Collection $files;
@@ -79,8 +72,6 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
     public function getRoles(): array
     {
         $roles = $this->roles;
-        // guarantee every user at least has ROLE_USER
-        $roles[] = 'ROLE_USER';
 
         return array_unique($roles);
     }
@@ -92,20 +83,12 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    /**
-     * @see PasswordAuthenticatedUserInterface
-     */
-    public function getPassword(): string
+    public function addRole(string $role): void
     {
-        return $this->password;
+        $this->roles[] = $role;
+
     }
 
-    public function setPassword(string $password): self
-    {
-        $this->password = $password;
-
-        return $this;
-    }
 
     /**
      * @see UserInterface
@@ -140,14 +123,14 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getMail(): ?string
+    public function getEmail(): ?string
     {
-        return $this->mail;
+        return $this->email;
     }
 
-    public function setMail(string $mail): self
+    public function setEmail(string $email): self
     {
-        $this->mail = $mail;
+        $this->email = $email;
 
         return $this;
     }

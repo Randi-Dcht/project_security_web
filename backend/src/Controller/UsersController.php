@@ -10,10 +10,60 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
-use Psr\Log\LoggerAwareInterface;
 
 class UsersController extends AbstractController
 {
+
+    #[Route('/register', name: 'register', methods: ['POST'])]
+    public function registerUser(UsersRepository $users, Request $request, SerializerInterface $serializer): JsonResponse
+    {
+        //TODO check all value !! (injection or bad value to logger !!!) #security
+
+        $subject = openssl_csr_get_subject($request);
+        if (! array_key_exists("emailAddress",$subject) or ! array_key_exists("CN",$subject)){
+            return new JsonResponse(null, Response::HTTP_BAD_REQUEST, [], false);
+        }
+        $email = $subject["emailAddress"];
+
+        $criteria = array('email' => $email);
+        $exist = $users->findBy($criteria);
+
+        if (count($exist) >= 1) {
+            return new JsonResponse(null, Response::HTTP_CONFLICT, [], false);
+        } else {
+
+            // create the user
+            $info["email"] = $email;
+            $name = $subject["CN"];
+            $info["name"] = $name;
+
+           $this->addUser($info, "ROLE_USER", $users, $serializer);
+
+            // sign the certificate request
+            $path = $this->getParameter('kernel.project_dir');
+            $cacert = "file://" . $path . "/cert/ca.crt";
+            $privkey = "file://" . $path . "/cert/ca.key";
+            $signed = openssl_csr_sign($request, $cacert, $privkey, 365, array('digest_alg'=>'sha256') );
+            openssl_x509_export($signed,$output);
+            //print_r($output);
+
+            return new JsonResponse($output, Response::HTTP_CREATED, [], false);
+        }
+
+
+    }
+    public function addUser(array $info, string $role,UsersRepository $usersRepository, SerializerInterface $serializer, ): void
+    {
+        $myId = date('y') . random_int(11, 999) . $usersRepository->count([]);
+        $user = new Users();
+        $user->setEmail($info["email"]);
+        $user->setName($info["name"]);
+        $user->setUuid($myId);
+        $user->setRoles([$role]);
+        $user->setDateSignUp(time());
+        $usersRepository->save($user, true);
+    }
+
     #[Route('/users/list', name: 'users_list', methods: ['GET'])]
     public function getListUser(UsersRepository $users_list, SerializerInterface $serializer): JsonResponse
     {
@@ -22,38 +72,20 @@ class UsersController extends AbstractController
         return new JsonResponse($userList, Response::HTTP_OK, [], true);
     }
 
-    #[Route('/users/delete/{id}', name: 'users_delete', methods: ['DELETE'])]
+    #[Route('/users/delete/{uuid}', name: 'users_delete', methods: ['DELETE'])]
     public function deleteUser(Users $user, UsersRepository $usersRepository): JsonResponse
     {
         $usersRepository->remove($user, true);
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 
-    #[Route('/patient/add', name: 'patient_create', methods: ['POST'])]
-    public function addPatient(UsersRepository $usersRepository, Request $request, SerializerInterface $serializer): JsonResponse
+    #[Route('/users/addDoctor/{uuid}', name: 'doctor_create', methods: ['POST'])]
+    public function addDoctor(Users $user, UsersRepository $usersRepository): JsonResponse
     {
-        $this->addUser($usersRepository, $request, $serializer, "PATIENT");
-        return new JsonResponse(null, Response::HTTP_CREATED);
+        if (!in_array("ROLE_DOCTOR", $user->getRoles())){
+            $user->addRole("ROLE_DOCTOR");
+            $usersRepository->save($user,true);
+        }
+        return new JsonResponse(null, Response::HTTP_OK);
     }
-
-    #[Route('/doctor/add', name: 'doctor_create', methods: ['POST'])]
-    public function addDoctor(UsersRepository $usersRepository, Request $request, SerializerInterface $serializer): JsonResponse
-    {
-        $this->addUser($usersRepository, $request, $serializer, "DOCTOR");
-        return new JsonResponse(null, Response::HTTP_CREATED);
-    }
-
-    public function addUser(UsersRepository $usersRepository, Request $request, SerializerInterface $serializer, string $role): void
-    {
-        //TODO check all value !! (injection or bad value to logger !!!) #security
-
-        $myId = date('y') . random_int(11, 999) . $usersRepository->count([]);
-        $req = $serializer->deserialize($request->getContent(), Users::class, 'json');
-        $req->setUuid($myId);
-        $req->setRoles([$role]);
-        $req->setDateSignUp(time());
-        $usersRepository->save($req, true);
-    }
-
-
 }
