@@ -27,9 +27,18 @@ scripts)
 
 >  The frontend part is available using `cd frontend` from the root of this archive.
 > 
-> To install `Node Package Manager` please run : `npm install`
+> To install `Node Package Manager` : 
+>
+> 1. please visit the distribution repo : https://github.com/nodesource/distributions/tree/master/deb
 > 
->  When installed, the command to run npm is : `npm run dev`
+>   and type `sudo apt install nodejs` on debian like linux distributions
+>
+> 2. please run : 
+> 
+>   `npm install` to install npm
+> 
+>   `npm run dev` to run npm
+>
 
 ### Backend :
 
