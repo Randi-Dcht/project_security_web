@@ -58,9 +58,12 @@ scripts)
 > 
 >   `sudo setfacl --modify user:[your_username]:rw /var/run/docker.sock`
 > 
->   By default, docker will use port 3306, please verify using :
+>   By default, docker will use :
 > 
->   `sudo netstat -nlpt |grep 3306` if this port is free, 
+>   - port 9000 for symphony (symfony_dockerized-php-1)
+>   - port 3306 for mariadb (symfony_dockerized-db-1)
+> 
+>   please verify using `sudo netstat -nlpt |grep [port number]` if those ports are free, 
 > 
 >   if not you can use `sudo service [service using 3306] stop`to free port 3306
 > 
