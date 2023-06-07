@@ -16,7 +16,7 @@ use Vich\UploaderBundle\Handler\DownloadHandler;
 class FilesController extends AbstractController
 {
     #[Route('/files/upload', name: 'add_file', methods: ['POST'])]
-    public function postFile(UsersRepository $users, FilesRepository $filesRepository, Request $request, ): JsonResponse
+    public function postFile(UsersRepository $users, FilesRepository $filesRepository, Request $request): JsonResponse
     {
 
         if (! $request->files->has("file") or ! $request->request->has("name") ){
@@ -38,6 +38,19 @@ class FilesController extends AbstractController
 
         return new JsonResponse(null, Response::HTTP_OK);
     }
+    #[Route('/files/delete/{name}', name: 'delete_file', methods: ['DELETE'])]
+    public function deleteFile(Files $file,UsersRepository $users, FilesRepository $files): JsonResponse
+    {
+        $id = $this->getUser()->getUserIdentifier();
+
+        if (!$this->hasAccess($id,$users,$file)){
+            return new JsonResponse( null,Response::HTTP_FORBIDDEN);
+        }
+
+        $files->remove($file,true);
+
+        return new JsonResponse(null, Response::HTTP_NO_CONTENT);
+    }
     #[Route('/files/', name: 'get_files_list', methods: ['GET'])]
     public function getFilesList(UsersRepository $users, SerializerInterface $serializer): JsonResponse
     {
@@ -53,16 +66,18 @@ class FilesController extends AbstractController
     #[Route('/files/{name}', name: 'get_file', methods: ['GET'])]
     public function getFile(Files $file,UsersRepository $users, DownloadHandler $downloadHandler): Response
     {
-        $user = $this->getUser();
-        $id = $user->getUserIdentifier();
-        $user = $users->findOneBy(["uuid" => $id]);
+        $id = $this->getUser()->getUserIdentifier();
 
-
-        if (!$file->hasAccess($user)){
+        if (!$this->hasAccess($id,$users,$file)){
             return new Response( null,Response::HTTP_FORBIDDEN);
         }
 
         return $downloadHandler->downloadObject($file, $file = 'file');
+    }
 
+    private function hasAccess(int $id,UsersRepository $users,Files $file) :bool
+    {
+        $user = $users->findOneBy(["uuid" => $id]);
+        return $file->hasAccess($user);
     }
 }

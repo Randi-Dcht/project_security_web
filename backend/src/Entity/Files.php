@@ -24,9 +24,9 @@ class Files implements \Serializable
     #[Ignore]
     private ?File $file = null;
 
-    #[ORM\Embedded(class: 'Vich\UploaderBundle\Entity\File')]
-    #[Ignore]
-    private ?EmbeddedFile $eFile = null;
+//    #[ORM\Embedded(class: 'Vich\UploaderBundle\Entity\File')]
+//    #[Ignore]
+//    private ?EmbeddedFile $eFile = null;
 
     #[ORM\Column(length: 255)]
     private ?string $name = null;
@@ -76,15 +76,15 @@ class Files implements \Serializable
         return $this->file;
     }
 
-    public function setEFile(EmbeddedFile $eFile): void
-    {
-        $this->eFile = $eFile;
-    }
-
-    public function getEFile(): ?EmbeddedFile
-    {
-        return $this->eFile;
-    }
+//    public function setEFile(EmbeddedFile $eFile): void
+//    {
+//        $this->eFile = $eFile;
+//    }
+//
+//    public function getEFile(): ?EmbeddedFile
+//    {
+//        return $this->eFile;
+//    }
     public function getName(): ?string
     {
         return $this->name;
