@@ -44,9 +44,27 @@ scripts)
 
 ### Backend :
 
->  The backend part is available the backend directory of this repo
+>  The backend part is available using `cd backend` from the root of this archive.
 > 
-> You can follow the instruction in the readme there (you can use Podman or Docker)
+> 1. Please install docker :
+> 
+>   https://docs.docker.com/engine/install/
+> 
+> 2. Please launch the server using :
+> 
+>   `docker compose up -d`
+>   
+>   If you can't connect to the Docker daemon socket, please run :
+> 
+>   `sudo setfacl --modify user:[your_username]:rw /var/run/docker.sock`
+> 
+>   By default, docker will use port 3306, please verify using :
+> 
+>   `sudo netstat -nlpt |grep 3306` if this port is free, 
+> 
+>   if not you can use `sudo service [service using 3306] stop`to free port 3306
+> 
+> _ps. You can follow the instruction in the readme there (you can use Podman or Docker)_
 
 ### Init db :
 
