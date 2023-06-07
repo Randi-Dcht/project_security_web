@@ -21,7 +21,7 @@ class UsersController extends AbstractController
 
         $subject = openssl_csr_get_subject($request);
         if (! array_key_exists("emailAddress",$subject) or ! array_key_exists("CN",$subject)){
-            return new JsonResponse(null, Response::HTTP_BAD_REQUEST, [], false);
+            return new JsonResponse(null, Response::HTTP_BAD_REQUEST);
         }
         $email = $subject["emailAddress"];
 
@@ -29,7 +29,7 @@ class UsersController extends AbstractController
         $exist = $users->findBy($criteria);
 
         if (count($exist) >= 1) {
-            return new JsonResponse(null, Response::HTTP_CONFLICT, [], false);
+            return new JsonResponse(null, Response::HTTP_CONFLICT);
         } else {
 
             // create the user
@@ -47,12 +47,12 @@ class UsersController extends AbstractController
             openssl_x509_export($signed,$output);
             //print_r($output);
 
-            return new JsonResponse($output, Response::HTTP_CREATED, [], false);
+            return new JsonResponse($output, Response::HTTP_CREATED);
         }
 
 
     }
-    public function addUser(array $info, string $role,UsersRepository $usersRepository, SerializerInterface $serializer, ): void
+    public function addUser(array $info, string $role,UsersRepository $usersRepository): void
     {
         $myId = date('y') . random_int(11, 999) . $usersRepository->count([]);
         $user = new Users();

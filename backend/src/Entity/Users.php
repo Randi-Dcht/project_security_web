@@ -7,9 +7,10 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Annotation\Ignore;
 
 #[ORM\Entity(repositoryClass: UsersRepository::class)]
-class Users implements UserInterface
+class Users implements UserInterface, \Serializable
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -32,6 +33,7 @@ class Users implements UserInterface
     private ?string $email = null;
 
     #[ORM\ManyToMany(targetEntity: Files::class, mappedBy: 'access')]
+    #[Ignore]
     private Collection $files;
 
     public function __construct()
@@ -143,22 +145,36 @@ class Users implements UserInterface
         return $this->files;
     }
 
-    public function addFile(Files $file): self
+    public function getFilesInfo(): array
     {
-        if (!$this->files->contains($file)) {
-            $this->files->add($file);
-            $file->addAccess($this);
-        }
+        $names = [];
+        foreach ($this->files as &$file) {
+           $names[] =$file;
+       }
 
-        return $this;
+            return $names;
+    }
+    public function serialize(): ?string
+    {
+        return serialize(array(
+            $this->id,
+            $this->email,
+            $this->name,
+            $this->roles,
+            $this->dateSignUp,
+        ));
     }
 
-    public function removeFile(Files $file): self
+    public function unserialize(string $data): void
     {
-        if ($this->files->removeElement($file)) {
-            $file->removeAccess($this);
-        }
-
-        return $this;
+        list(
+            $this->id,
+            $this->email,
+            $this->name,
+            $this->roles,
+            $this->dateSignUp,
+            ) = unserialize($data);
     }
+
+
 }

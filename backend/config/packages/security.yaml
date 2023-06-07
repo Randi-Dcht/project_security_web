@@ -32,6 +32,7 @@ security:
     # TODO: Protect endpoints
     access_control:
         - { path: '^/users', roles: ROLE_USER }
+        - { path: '^/files', roles: ROLE_USER }
         # require ROLE_ADMIN for /admin*
         # - { path: '^/users', roles: ROLE_ADMIN }
 

@@ -4,27 +4,65 @@ namespace App\Controller;
 
 use App\Entity\Files;
 use App\Repository\FilesRepository;
+use App\Repository\UsersRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
+use Vich\UploaderBundle\Handler\DownloadHandler;
 
 class FilesController extends AbstractController
 {
     #[Route('/files/upload', name: 'add_file', methods: ['POST'])]
-    public function postFile(FilesRepository $filesRepository, Request $request, SerializerInterface $serializer): JsonResponse
+    public function postFile(UsersRepository $users, FilesRepository $filesRepository, Request $request, ): JsonResponse
     {
-        //TODO add file in db with permission user
-        $req = $serializer->deserialize($request->getContent(), Files::class, 'json');
-        $filesRepository->save($req, true);
 
-        //save file in folder
-        $file = fopen("files/".$req->getUuid(), "w");
-        fwrite($file, $req);
-        fclose($file);
+        if (! $request->files->has("file") or ! $request->request->has("name") ){
+            return new JsonResponse(null, Response::HTTP_BAD_REQUEST);
+        }
 
-        return new JsonResponse("200", Response::HTTP_OK, [], true);
+        $file_ = $request->files->get("file");
+        $file = new Files();
+        $file->setOriginalName($request->get("name"));
+        $file->setFile($file_);
+
+        $id = $this->getUser()->getUserIdentifier();
+        $user = $users->findOneBy(["uuid" => $id]);
+
+        $file->addAccess($user);
+
+        $filesRepository->save($file, true);
+
+
+        return new JsonResponse(null, Response::HTTP_OK);
+    }
+    #[Route('/files/', name: 'get_files_list', methods: ['GET'])]
+    public function getFilesList(UsersRepository $users, SerializerInterface $serializer): JsonResponse
+    {
+        $user = $this->getUser();
+        $id = $user->getUserIdentifier();
+        $user = $users->findOneBy(["uuid" => $id]);
+        $files = $user->getFiles();
+
+        $files = $serializer->serialize($files, 'json');
+
+        return new JsonResponse($files, Response::HTTP_OK, [], true);
+    }
+    #[Route('/files/{name}', name: 'get_file', methods: ['GET'])]
+    public function getFile(Files $file,UsersRepository $users, DownloadHandler $downloadHandler): Response
+    {
+        $user = $this->getUser();
+        $id = $user->getUserIdentifier();
+        $user = $users->findOneBy(["uuid" => $id]);
+
+
+        if (!$file->hasAccess($user)){
+            return new Response( null,Response::HTTP_FORBIDDEN);
+        }
+
+        return $downloadHandler->downloadObject($file, $file = 'file');
+
     }
 }

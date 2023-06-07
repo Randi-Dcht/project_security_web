@@ -13,7 +13,7 @@ services:
             MARIADB_USER: ${MYSQL_USER}
             MARIADB_PASSWORD: ${MYSQL_PASSWORD}
         ports:
-            - 3306:3306
+            - "3306:3306"
         networks:
             - symfony_app
     php:
@@ -35,7 +35,7 @@ services:
             - symfony_app_var:/var/www/symfony/var
             - symfony_app_vendor:/var/www/symfony/vendor
         ports:
-            - 1026:443
+            - "1026:443"
         networks:
             - symfony_app
         env_file:
