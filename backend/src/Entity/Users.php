@@ -46,11 +46,19 @@ class Users implements UserInterface, \Serializable
     #[Ignore]
     private Collection $patient;
 
+    #[ORM\OneToMany(mappedBy: 'origin', targetEntity: Requests::class, orphanRemoval: true)]
+    private Collection $requests;
+
+    #[ORM\OneToMany(mappedBy: 'destination', targetEntity: Requests::class, orphanRemoval: true)]
+    private Collection $requested;
+
     public function __construct()
     {
         $this->files = new ArrayCollection();
         $this->patient = new ArrayCollection();
         $this->doctor = new ArrayCollection();
+        $this->requests = new ArrayCollection();
+        $this->requested = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -229,6 +237,66 @@ class Users implements UserInterface, \Serializable
     public function getPatient(): Collection
     {
         return $this->patient;
+    }
+
+    /**
+     * @return Collection<int, Requests>
+     */
+    public function getRequests(): Collection
+    {
+        return $this->requests;
+    }
+
+    public function addRequest(Requests $request): self
+    {
+        if (!$this->requests->contains($request)) {
+            $this->requests->add($request);
+            $request->setOrigin($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRequest(Requests $request): self
+    {
+        if ($this->requests->removeElement($request)) {
+            // set the owning side to null (unless already changed)
+            if ($request->getOrigin() === $this) {
+                $request->setOrigin(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Requests>
+     */
+    public function getRequested(): Collection
+    {
+        return $this->requested;
+    }
+
+    public function addRequested(Requests $requested): self
+    {
+        if (!$this->requested->contains($requested)) {
+            $this->requested->add($requested);
+            $requested->setDestination($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRequested(Requests $requested): self
+    {
+        if ($this->requested->removeElement($requested)) {
+            // set the owning side to null (unless already changed)
+            if ($requested->getDestination() === $this) {
+                $requested->setDestination(null);
+            }
+        }
+
+        return $this;
     }
 
 

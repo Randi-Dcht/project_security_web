@@ -9,6 +9,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\SerializerInterface;
 
 class UsersController extends AbstractController
@@ -160,6 +161,17 @@ class UsersController extends AbstractController
         }else{
             return new JsonResponse(null, Response::HTTP_BAD_REQUEST);
         }
+    }
+
+    #[Route('/me', name: 'me', methods: ['GET'])]
+    public function me(UsersRepository $users, SerializerInterface $serializer): JsonResponse
+    {
+        $id = $this->getUser()->getUserIdentifier();
+        $user = $users->findOneBy(["uuid" => $id]);
+        $user = $serializer->serialize($user, 'json');
+
+        return new JsonResponse($user, Response::HTTP_OK,[], true);
+
     }
 
 }
