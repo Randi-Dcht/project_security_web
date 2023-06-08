@@ -59,33 +59,38 @@ const Signup = () =>
         // Générer une paire de clés
         const keys = forge.pki.rsa.generateKeyPair(2048);
 
-        // Créer un CSR
-        const csr = forge.pki.createCertificationRequest();
-        csr.publicKey = keys.publicKey;
-        csr.setSubject([{
+        // Créer le certificat X.509
+        const cert = forge.pki.createCertificate();
+        cert.publicKey = keys.publicKey;
+        cert.serialNumber = '01';
+        cert.validity.notBefore = new Date();
+        cert.validity.notAfter.setFullYear(cert.validity.notBefore.getFullYear() + 1);
+        const attrs = [{
+            name: 'commonMail',
+            value: email
+        }, {
             name: 'commonName',
             value: lastName
-        }, {
-            name: 'emailAddress',
-            value: email
-        }]);
+        }];
+        cert.setSubject(attrs);
+        cert.setIssuer(attrs);
 
-        // Signer le CSR
-        csr.sign(keys.privateKey);
+        // Signer le certificat
+        cert.sign(keys.privateKey);
 
-        // Convertir le CSR en PEM
-        const csrPem = forge.pki.certificationRequestToPem(csr);
+        // Convertir le certificat en format PEM
+        const certPem = forge.pki.certificateToPem(cert);
 
-        // Convertir le CSR PEM en ArrayBuffer
-        const csrArrayBuffer = new TextEncoder().encode(csrPem);
+        // Convertir le certificat PEM en ArrayBuffer
+        const certArrayBuffer = new TextEncoder().encode(certPem);
 
-        // Envoyer le CSR au serveur pour qu'il soit signé
+        // Envoyer le certificat au serveur
         const response = await fetch('https://localhost:1026/register', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/octet-stream'
             },
-            body: csrArrayBuffer
+            body: certArrayBuffer
         });
 
         if (response.ok) {
