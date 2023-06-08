@@ -3,6 +3,7 @@ import Select from 'react-select';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import '../styles/Field.css';
+import forge from 'node-forge';
 
 const Signup = () =>
 {
@@ -10,7 +11,7 @@ const Signup = () =>
     const [registerNumber, setRegisterNumber] = useState('');
     const registerNumberRef = useRef('');
 
-    const registerClick = () => {
+    const registerClick = async () => {
         // Vérification du format de l'adresse e-mail
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
@@ -53,9 +54,51 @@ const Signup = () =>
             return;
         }
     
-        // TODO : envoyer les données au serveur
-        console.log('Inscription réussie !');
-    };
+        // TODO : hash du mot de passe ??
+
+        // Générer une paire de clés
+        const keys = forge.pki.rsa.generateKeyPair(2048);
+
+        // Créer un CSR
+        const csr = forge.pki.createCertificationRequest();
+        csr.publicKey = keys.publicKey;
+        csr.setSubject([{
+            name: 'commonName',
+            value: lastName
+        }, {
+            name: 'emailAddress',
+            value: email
+        }]);
+
+        // Signer le CSR
+        csr.sign(keys.privateKey);
+
+        // Convertir le CSR en PEM
+        const csrPem = forge.pki.certificationRequestToPem(csr);
+
+        // Envoyer le CSR au serveur pour qu'il soit signé
+        const response = await fetch('/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                csr: csrPem,
+                email : email,
+                password : password,
+                lastName : lastName,
+                firstName : firstName,
+                birthDate : selectedDate,
+                registerNumber : registerNumber
+            })
+        });
+
+        if (response.ok) {
+            console.log('Inscription réussie !');
+        } else {
+            console.error('Erreur lors de l\'inscription:', response.statusText);
+        }
+        };
     
 
     const handleRegisterNumberChange = (event) => {
