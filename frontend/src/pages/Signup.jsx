@@ -84,13 +84,17 @@ const Signup = () =>
         // Convertir le certificat PEM en ArrayBuffer
         const certArrayBuffer = new TextEncoder().encode(certPem);
 
+        // Préparez le corps de la requête (vu que le serveur attend un fichier)
+        const body = new FormData();
+        body.append('file', new Blob([certArrayBuffer]), 'client.csr');
+
         // Envoyer le certificat au serveur
         const response = await fetch('https://localhost:1026/register', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/octet-stream'
             },
-            body: certArrayBuffer
+            body: body
         });
 
         if (response.ok) {
