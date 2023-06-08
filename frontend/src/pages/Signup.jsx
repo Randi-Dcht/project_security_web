@@ -76,21 +76,16 @@ const Signup = () =>
         // Convertir le CSR en PEM
         const csrPem = forge.pki.certificationRequestToPem(csr);
 
+        // Convertir le CSR PEM en ArrayBuffer
+        const csrArrayBuffer = new TextEncoder().encode(csrPem);
+
         // Envoyer le CSR au serveur pour qu'il soit signé
-        const response = await fetch('/register', {
+        const response = await fetch('https://localhost:1026/register', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/octet-stream'
             },
-            body: JSON.stringify({
-                csr: csrPem,
-                email : email,
-                password : password,
-                lastName : lastName,
-                firstName : firstName,
-                birthDate : selectedDate,
-                registerNumber : registerNumber
-            })
+            body: csrArrayBuffer
         });
 
         if (response.ok) {
@@ -98,7 +93,7 @@ const Signup = () =>
         } else {
             console.error('Erreur lors de l\'inscription:', response.statusText);
         }
-        };
+    };
     
 
     const handleRegisterNumberChange = (event) => {
