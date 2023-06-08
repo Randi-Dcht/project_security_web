@@ -37,7 +37,13 @@ class UsersController extends AbstractController
             $name = $subject["CN"];
             $info["name"] = $name;
 
-           $this->addUser($info, "ROLE_USER", $users, $serializer);
+            $roles = ["ROLE_USER","ROLE_PATIENT"];
+
+            //TODO remove that ?
+            if (count($users->findAll()) ==0 ){
+                $roles = ["ROLE_USER","ROLE_ADMIN"];
+            }
+            $this->addUser($info, $roles, $users);
 
             // sign the certificate request
             $path = $this->getParameter('kernel.project_dir');
@@ -52,14 +58,14 @@ class UsersController extends AbstractController
 
 
     }
-    public function addUser(array $info, string $role,UsersRepository $usersRepository): void
+    public function addUser(array $info, array $role,UsersRepository $usersRepository): void
     {
         $myId = date('y') . random_int(11, 999) . $usersRepository->count([]);
         $user = new Users();
         $user->setEmail($info["email"]);
         $user->setName($info["name"]);
         $user->setUuid($myId);
-        $user->setRoles([$role]);
+        $user->setRoles($role);
         $user->setDateSignUp(time());
         $usersRepository->save($user, true);
     }
@@ -79,10 +85,11 @@ class UsersController extends AbstractController
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 
-    #[Route('/users/addDoctor/{uuid}', name: 'doctor_create', methods: ['POST'])]
-    public function addDoctor(Users $user, UsersRepository $usersRepository): JsonResponse
+    #[Route('/users/makeDoctor/{uuid}', name: 'doctor_create', methods: ['POST'])]
+    public function makeDoctor(Users $user, UsersRepository $usersRepository): JsonResponse
     {
         if (!in_array("ROLE_DOCTOR", $user->getRoles())){
+            $user->removeRole("ROLE_PATIENT");
             $user->addRole("ROLE_DOCTOR");
             $usersRepository->save($user,true);
         }

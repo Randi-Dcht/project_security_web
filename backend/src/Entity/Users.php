@@ -91,6 +91,12 @@ class Users implements UserInterface, \Serializable
 
     }
 
+    public function removeRole(string $role): void
+    {
+        $this->roles = \array_diff($this->roles, [$role]);;
+
+    }
+
 
     /**
      * @see UserInterface
