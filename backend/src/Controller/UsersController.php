@@ -15,7 +15,7 @@ class UsersController extends AbstractController
 {
 
     #[Route('/register', name: 'register', methods: ['POST'])]
-    public function registerUser(UsersRepository $users, Request $request, SerializerInterface $serializer): JsonResponse
+    public function registerUser(UsersRepository $users, Request $request): JsonResponse
     {
         //TODO check all value !! (injection or bad value to logger !!!) #security
 
@@ -46,18 +46,21 @@ class UsersController extends AbstractController
             $this->addUser($info, $roles, $users);
 
             // sign the certificate request
-            $path = $this->getParameter('kernel.project_dir');
-            $cacert = "file://" . $path . "/cert/ca.crt";
-            $privkey = "file://" . $path . "/cert/ca.key";
-            $signed = openssl_csr_sign($request, $cacert, $privkey, 365, array('digest_alg'=>'sha256') );
-            openssl_x509_export($signed,$output);
-            //print_r($output);
+            $output = $this->sign_csr($request);
 
             return new JsonResponse($output, Response::HTTP_CREATED);
         }
-
-
     }
+
+    private function sign_csr(string $request) :string{
+        $path = $this->getParameter('kernel.project_dir');
+        $cacert = "file://" . $path . "/cert/ca.crt";
+        $privkey = "file://" . $path . "/cert/ca.key";
+        $signed = openssl_csr_sign($request, $cacert, $privkey, 365, array('digest_alg'=>'sha256') );
+        openssl_x509_export($signed,$output);
+        return $output;
+    }
+
     public function addUser(array $info, array $role,UsersRepository $usersRepository): void
     {
         $myId = date('y') . random_int(11, 999) . $usersRepository->count([]);
@@ -69,6 +72,40 @@ class UsersController extends AbstractController
         $user->setDateSignUp(time());
         $usersRepository->save($user, true);
     }
+
+//    #[Route('/revoke', name: 'revoke_cert', methods: ['POST'])]
+//    public function revokeCert(UsersRepository $users, Request $request): JsonResponse
+//    {
+//        $path = $this->getParameter('kernel.project_dir');
+//        $cacert = "file://" . $path . "/cert/ca.crt";
+//        $privkey = "file://" . $path . "/cert/ca.key";
+//        $crl = "file://" . $path . "/cert/crl/pulp_crl.pem";
+//        $crl = file_get_contents($crl);
+//
+//        $x509 = new X509();
+//        $bob = "file://" . $path . "/cert//client.crt";
+//        $bob = $x509->loadX509(file_get_contents($bob));
+//        $sn = $bob["tbsCertificate"]["serialNumber"];
+//        $sn = $sn->toString();
+//
+//        $CAIssuer = new X509();
+//        $CAIssuer->loadCA(file_get_contents($cacert));
+//        $pk = PublicKeyLoader::loadPrivateKey(file_get_contents($privkey));
+//        $CAIssuer->setPrivateKey($pk);
+//
+//        $x509 = new x509();
+//        $crl = $x509->loadCRL($crl);
+//        $x509->unrevoke($sn);
+//        //$revoked = $x509->listRevoked($crl);
+//        //var_dump($revoked);
+//        $signed = $x509->signCRL($CAIssuer, $x509);
+//        print_r($signed);
+//        //$crl = $x509->saveCRL($signed);
+//        //print_r($crl);
+//
+//        return new JsonResponse(null, Response::HTTP_OK);
+//
+//    }
 
     #[Route('/users/list', name: 'users_list', methods: ['GET'])]
     public function getListUser(UsersRepository $users_list, SerializerInterface $serializer): JsonResponse
@@ -95,4 +132,34 @@ class UsersController extends AbstractController
         }
         return new JsonResponse(null, Response::HTTP_OK);
     }
+
+    #[Route('/patient/addDoctor/{uuid}', name: 'doctor_add', methods: ['POST'])]
+    public function addDoctor(Users $doctor, UsersRepository $users): JsonResponse
+    {
+        if (in_array("ROLE_DOCTOR", $doctor->getRoles())){
+            $id = $this->getUser()->getUserIdentifier();
+            $user = $users->findOneBy(["uuid" => $id]);
+            $doctor->addPatient($user);
+            $users->save($doctor,true);
+            return new JsonResponse(null, Response::HTTP_OK);
+        }else{
+            return new JsonResponse(null, Response::HTTP_BAD_REQUEST);
+        }
+
+    }
+
+    #[Route('/patient/removeDoctor/{uuid}', name: 'doctor_remove', methods: ['DELETE'])]
+    public function removeDoctor(Users $doctor, UsersRepository $users): JsonResponse
+    {
+        if (in_array("ROLE_DOCTOR", $doctor->getRoles())){
+            $id = $this->getUser()->getUserIdentifier();
+            $user = $users->findOneBy(["uuid" => $id]);
+            $doctor->removePatient($user);
+            $users->save($doctor,true);
+            return new JsonResponse(null, Response::HTTP_OK);
+        }else{
+            return new JsonResponse(null, Response::HTTP_BAD_REQUEST);
+        }
+    }
+
 }

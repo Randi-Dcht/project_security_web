@@ -36,9 +36,21 @@ class Users implements UserInterface, \Serializable
     #[Ignore]
     private Collection $files;
 
+    #[ORM\ManyToMany(targetEntity: Users::class, mappedBy: 'patient')]
+    #[ORM\JoinColumn(name: 'doctor_id', referencedColumnName: 'id')]
+    #[ORM\InverseJoinColumn(name: 'patient_id', referencedColumnName: 'id')]
+    #[Ignore]
+    private Collection $doctor;
+
+    #[ORM\ManyToMany(targetEntity: Users::class, inversedBy: 'doctor')]
+    #[Ignore]
+    private Collection $patient;
+
     public function __construct()
     {
         $this->files = new ArrayCollection();
+        $this->patient = new ArrayCollection();
+        $this->doctor = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -96,7 +108,6 @@ class Users implements UserInterface, \Serializable
         $this->roles = \array_diff($this->roles, [$role]);;
 
     }
-
 
     /**
      * @see UserInterface
@@ -181,6 +192,46 @@ class Users implements UserInterface, \Serializable
             $this->dateSignUp,
             ) = unserialize($data);
     }
+
+    public function addDoctor(Users $doctor): self
+    {
+       $doctor->addPatient($this);
+       return $this;
+    }
+
+    public function removeDoctor(Users $doctor): self
+    {
+        $doctor->removePatient($this);
+        return $this;
+    }
+
+    public function addPatient(Users $patient): self
+    {
+        if (!$this->patient->contains($patient) ) {
+            $this->patient->add($patient);
+        }
+
+        return $this;
+    }
+
+    public function removePatient(Users $patient): self
+    {
+        $this->patient->removeElement($patient);
+
+        return $this;
+    }
+
+    public function getDoctor(): Collection
+    {
+        return $this->doctor;
+    }
+
+    public function getPatient(): Collection
+    {
+        return $this->patient;
+    }
+
+
 
 
 }

@@ -31,8 +31,11 @@ security:
     # Note: Only the *first* access control that matches will be used
     # TODO: Protect endpoints
     access_control:
+        - { path: '^/register', roles: [] }
         - { path: '^/users', roles: ROLE_ADMIN }
         - { path: '^/files', roles: ROLE_USER }
+        - { path: '^/patient', roles: [ROLE_PATIENT,ROLE_ADMIN] }
+        - { path: '^/doctor', roles: [ROLE_DOCTOR,ROLE_ADMIN] }
         # require ROLE_ADMIN for /admin*
         # - { path: '^/users', roles: ROLE_ADMIN }
 
