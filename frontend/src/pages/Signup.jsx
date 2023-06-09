@@ -10,6 +10,11 @@ const Signup = () =>
     const [selectedDate, setSelectedDate] = useState('');
     const [registerNumber, setRegisterNumber] = useState('');
     const registerNumberRef = useRef('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [lastName, setLastName] = useState('');
+    const [firstName, setFirstName] = useState('');
 
     const registerClick = async () => {
         // Vérification du format de l'adresse e-mail
@@ -191,35 +196,36 @@ const Signup = () =>
             <div className="field">
                 <label className="label">Email</label>
                 <div className="control">
-                    <input className="input form-field" type="email" placeholder="e.g. alexsmith@gmail.com"/>
+                    <input className="input form-field" type="email" placeholder="e.g. alexsmith@gmail.com"
+                            onChange={(event) => setEmail(event.target.value)}/>
                 </div>
             </div>
 
             <div className="field">
                 <label className="label">Mot de passe</label>
                 <div className="control">
-                    <input className="input form-field" type="password" placeholder="********"/>
+                    <input className="input form-field" type="password" placeholder="********" onChange={(event) => setPassword(event.target.value)}/>
                 </div>
             </div>
 
             <div className="field">
                 <label className="label">Confirmer le mot de passe</label>
                 <div className="control">
-                    <input className="input form-field" type="password" placeholder="********"/>
+                    <input className="input form-field" type="password" placeholder="********" onChange={(event) => setConfirmPassword(event.target.value)}/>
                 </div>
             </div>
 
             <div className="field">
                 <label className="label">Nom</label>
                 <div className="control">
-                    <input className="input form-field" type="text" placeholder="e.g. Smith"/>
+                    <input className="input form-field" type="text" placeholder="e.g. Smith" onChange={(event) => setLastName(event.target.value)}/>
                 </div>
             </div>
 
             <div className="field">
                 <label className="label">Prénom</label>
                 <div className="control">
-                    <input className="input form-field" type="text" placeholder="e.g. Alex"/>
+                    <input className="input form-field" type="text" placeholder="e.g. Alex" onChange={(event) => setFirstName(event.target.value)}/>
                 </div>
             </div>
 
