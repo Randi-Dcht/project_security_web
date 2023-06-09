@@ -6,11 +6,11 @@ use App\Repository\UsersRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Annotation\Ignore;
 
 #[ORM\Entity(repositoryClass: UsersRepository::class)]
-class Users implements UserInterface, PasswordAuthenticatedUserInterface
+class Users implements UserInterface, \Serializable
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -23,27 +23,42 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private array $roles = [];
 
-    /**
-     * @var string The hashed password
-     */
-    #[ORM\Column]
-    private ?string $password = null;
-
     #[ORM\Column(length: 255)]
     private ?string $dateSignUp = null;
 
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $mail = null;
+    #[ORM\Column(length: 255, unique: true)]
+    private ?string $email = null;
 
     #[ORM\ManyToMany(targetEntity: Files::class, mappedBy: 'access')]
+    #[Ignore]
     private Collection $files;
+
+    #[ORM\ManyToMany(targetEntity: Users::class, mappedBy: 'patient')]
+    #[ORM\JoinColumn(name: 'doctor_id', referencedColumnName: 'id')]
+    #[ORM\InverseJoinColumn(name: 'patient_id', referencedColumnName: 'id')]
+    #[Ignore]
+    private Collection $doctor;
+
+    #[ORM\ManyToMany(targetEntity: Users::class, inversedBy: 'doctor')]
+    #[Ignore]
+    private Collection $patient;
+
+    #[ORM\OneToMany(mappedBy: 'origin', targetEntity: Requests::class, orphanRemoval: true)]
+    private Collection $requests;
+
+    #[ORM\OneToMany(mappedBy: 'destination', targetEntity: Requests::class, orphanRemoval: true)]
+    private Collection $requested;
 
     public function __construct()
     {
         $this->files = new ArrayCollection();
+        $this->patient = new ArrayCollection();
+        $this->doctor = new ArrayCollection();
+        $this->requests = new ArrayCollection();
+        $this->requested = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -79,8 +94,6 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
     public function getRoles(): array
     {
         $roles = $this->roles;
-        // guarantee every user at least has ROLE_USER
-        $roles[] = 'ROLE_USER';
 
         return array_unique($roles);
     }
@@ -92,19 +105,16 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    /**
-     * @see PasswordAuthenticatedUserInterface
-     */
-    public function getPassword(): string
+    public function addRole(string $role): void
     {
-        return $this->password;
+        $this->roles[] = $role;
+
     }
 
-    public function setPassword(string $password): self
+    public function removeRole(string $role): void
     {
-        $this->password = $password;
+        $this->roles = \array_diff($this->roles, [$role]);;
 
-        return $this;
     }
 
     /**
@@ -140,14 +150,14 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getMail(): ?string
+    public function getEmail(): ?string
     {
-        return $this->mail;
+        return $this->email;
     }
 
-    public function setMail(string $mail): self
+    public function setEmail(string $email): self
     {
-        $this->mail = $mail;
+        $this->email = $email;
 
         return $this;
     }
@@ -160,22 +170,136 @@ class Users implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->files;
     }
 
-    public function addFile(Files $file): self
+    public function getFilesInfo(): array
     {
-        if (!$this->files->contains($file)) {
-            $this->files->add($file);
-            $file->addAccess($this);
+        $names = [];
+        foreach ($this->files as &$file) {
+           $names[] =$file;
+       }
+
+            return $names;
+    }
+    public function serialize(): ?string
+    {
+        return serialize(array(
+            $this->id,
+            $this->email,
+            $this->name,
+            $this->roles,
+            $this->dateSignUp,
+        ));
+    }
+
+    public function unserialize(string $data): void
+    {
+        list(
+            $this->id,
+            $this->email,
+            $this->name,
+            $this->roles,
+            $this->dateSignUp,
+            ) = unserialize($data);
+    }
+
+    public function addDoctor(Users $doctor): self
+    {
+       $doctor->addPatient($this);
+       return $this;
+    }
+
+    public function removeDoctor(Users $doctor): self
+    {
+        $doctor->removePatient($this);
+        return $this;
+    }
+
+    public function addPatient(Users $patient): self
+    {
+        if (!$this->patient->contains($patient) ) {
+            $this->patient->add($patient);
         }
 
         return $this;
     }
 
-    public function removeFile(Files $file): self
+    public function removePatient(Users $patient): self
     {
-        if ($this->files->removeElement($file)) {
-            $file->removeAccess($this);
+        $this->patient->removeElement($patient);
+
+        return $this;
+    }
+
+    public function getDoctor(): Collection
+    {
+        return $this->doctor;
+    }
+
+    public function getPatient(): Collection
+    {
+        return $this->patient;
+    }
+
+    /**
+     * @return Collection<int, Requests>
+     */
+    public function getRequests(): Collection
+    {
+        return $this->requests;
+    }
+
+    public function addRequest(Requests $request): self
+    {
+        if (!$this->requests->contains($request)) {
+            $this->requests->add($request);
+            $request->setOrigin($this);
         }
 
         return $this;
     }
+
+    public function removeRequest(Requests $request): self
+    {
+        if ($this->requests->removeElement($request)) {
+            // set the owning side to null (unless already changed)
+            if ($request->getOrigin() === $this) {
+                $request->setOrigin(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Requests>
+     */
+    public function getRequested(): Collection
+    {
+        return $this->requested;
+    }
+
+    public function addRequested(Requests $requested): self
+    {
+        if (!$this->requested->contains($requested)) {
+            $this->requested->add($requested);
+            $requested->setDestination($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRequested(Requests $requested): self
+    {
+        if ($this->requested->removeElement($requested)) {
+            // set the owning side to null (unless already changed)
+            if ($requested->getDestination() === $this) {
+                $requested->setDestination(null);
+            }
+        }
+
+        return $this;
+    }
+
+
+
+
 }

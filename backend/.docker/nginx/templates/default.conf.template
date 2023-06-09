@@ -1,0 +1,54 @@
+server {
+    server_tokens off;
+
+    listen 443 ssl;
+    listen [::]:443 ssl;
+
+    # enable client certificate verification
+    ssl_client_certificate /var/www/symfony/cert/ca.crt;
+    ssl_verify_client optional_no_ca;
+    ssl_verify_depth 1;
+    ssl_crl /var/www/symfony/cert/crl/crl.pem;
+
+    # HTTPS
+    ssl_certificate /var/www/symfony/cert/server.crt;
+    ssl_certificate_key /var/www/symfony/cert/server.key;
+
+    # x509
+    ssl_dhparam /var/www/symfony/cert/dhparam.pem;
+
+    ssl_protocols TLSv1.3;
+
+    server_name ${NGINX_BACKEND_DOMAIN};
+    root /var/www/symfony/public;
+
+    index index.php index.html;
+
+    location / {
+        #try_files $uri $uri/ /index.php;
+        try_files $uri /index.php$is_args$args;
+    }
+    location ~ \.php$ {
+        fastcgi_param HTTPS on;
+        fastcgi_pass php:9000; # Change if path is different
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_param SSL_CLIENT_I_DN $ssl_client_i_dn;
+        fastcgi_param SSL_CLIENT_S_DN $ssl_client_s_dn; #We pass here information from the client certificate
+        fastcgi_param SSL_CLIENT_VERIFY $ssl_client_verify;
+
+        include fastcgi_params;
+        fastcgi_buffers 16 32k;
+        fastcgi_buffer_size 64k;
+        fastcgi_busy_buffers_size 64k;
+    }
+    location ~ ^(\/(users|patient|files|doctor)\/?.*)$ { # Don't forget to change here with your own regex
+    	if ($ssl_client_verify != SUCCESS) {
+    		return 403;
+    		break;
+    	}
+
+        try_files $uri /index.php$is_args$args;
+    }
+
+}

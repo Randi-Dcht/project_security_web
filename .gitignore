@@ -2,5 +2,7 @@
 .idea
 *.zip
 *.iml
-*.pdf
 *.odt
+
+# local files
+health.pdf

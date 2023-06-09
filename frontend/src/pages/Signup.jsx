@@ -3,14 +3,20 @@ import Select from 'react-select';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import '../styles/Field.css';
+import forge from 'node-forge';
 
 const Signup = () =>
 {
     const [selectedDate, setSelectedDate] = useState('');
     const [registerNumber, setRegisterNumber] = useState('');
     const registerNumberRef = useRef('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [lastName, setLastName] = useState('');
+    const [firstName, setFirstName] = useState('');
 
-    const registerClick = () => {
+    const registerClick = async () => {
         // Vérification du format de l'adresse e-mail
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
@@ -53,8 +59,54 @@ const Signup = () =>
             return;
         }
     
-        // TODO : envoyer les données au serveur
-        console.log('Inscription réussie !');
+        // TODO : hash du mot de passe ??
+
+        // Générer une paire de clés
+        const keys = forge.pki.rsa.generateKeyPair(2048);
+
+        // Créer le certificat X.509
+        const cert = forge.pki.createCertificate();
+        cert.publicKey = keys.publicKey;
+        cert.serialNumber = '01';
+        cert.validity.notBefore = new Date();
+        cert.validity.notAfter.setFullYear(cert.validity.notBefore.getFullYear() + 1);
+        const attrs = [{
+            name: 'commonMail',
+            value: email
+        }, {
+            name: 'commonName',
+            value: lastName
+        }];
+        cert.setSubject(attrs);
+        cert.setIssuer(attrs);
+
+        // Signer le certificat
+        cert.sign(keys.privateKey);
+
+        // Convertir le certificat en format PEM
+        const certPem = forge.pki.certificateToPem(cert);
+
+        // Convertir le certificat PEM en ArrayBuffer
+        const certArrayBuffer = new TextEncoder().encode(certPem);
+
+        // Préparez le corps de la requête (vu que le serveur attend un fichier)
+        const body = new FormData();
+        body.append('file', new Blob([certArrayBuffer]), 'client.csr');
+
+        // Envoyer le certificat au serveur
+        const response = await fetch('https://localhost:1026/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/octet-stream'
+            },
+            body: body
+        });
+
+        if (response.ok) {
+            console.log('Inscription réussie !');
+        } else {
+            console.error('Erreur lors de l\'inscription:', response.statusText);
+        }
     };
     
 
@@ -144,35 +196,36 @@ const Signup = () =>
             <div className="field">
                 <label className="label">Email</label>
                 <div className="control">
-                    <input className="input form-field" type="email" placeholder="e.g. alexsmith@gmail.com"/>
+                    <input className="input form-field" type="email" placeholder="e.g. alexsmith@gmail.com"
+                            onChange={(event) => setEmail(event.target.value)}/>
                 </div>
             </div>
 
             <div className="field">
                 <label className="label">Mot de passe</label>
                 <div className="control">
-                    <input className="input form-field" type="password" placeholder="********"/>
+                    <input className="input form-field" type="password" placeholder="********" onChange={(event) => setPassword(event.target.value)}/>
                 </div>
             </div>
 
             <div className="field">
                 <label className="label">Confirmer le mot de passe</label>
                 <div className="control">
-                    <input className="input form-field" type="password" placeholder="********"/>
+                    <input className="input form-field" type="password" placeholder="********" onChange={(event) => setConfirmPassword(event.target.value)}/>
                 </div>
             </div>
 
             <div className="field">
                 <label className="label">Nom</label>
                 <div className="control">
-                    <input className="input form-field" type="text" placeholder="e.g. Smith"/>
+                    <input className="input form-field" type="text" placeholder="e.g. Smith" onChange={(event) => setLastName(event.target.value)}/>
                 </div>
             </div>
 
             <div className="field">
                 <label className="label">Prénom</label>
                 <div className="control">
-                    <input className="input form-field" type="text" placeholder="e.g. Alex"/>
+                    <input className="input form-field" type="text" placeholder="e.g. Alex" onChange={(event) => setFirstName(event.target.value)}/>
                 </div>
             </div>
 

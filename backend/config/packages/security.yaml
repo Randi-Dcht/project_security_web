@@ -8,15 +8,18 @@ security:
         app_user_provider:
             entity:
                 class: App\Entity\Users
-                property: uuid
+                property: email
         # used to reload user from session & other features (e.g. switch_user)
     firewalls:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
         main:
-            lazy: true
-            provider: app_user_provider
+
+            x509:
+                provider: app_user_provider
+                user: SSL_CLIENT_S_DN_email
+                credentials: SSL_CLIENT_S_DN
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall
@@ -26,9 +29,22 @@ security:
 
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
+    # TODO: Protect endpoints
     access_control:
-        # - { path: ^/admin, roles: ROLE_ADMIN }
-        # - { path: ^/profile, roles: ROLE_USER }
+        - { path: '^/register', roles: [] }
+        - { path: '^/users', roles: ROLE_ADMIN }
+        - { path: '^/files', roles: ROLE_USER }
+        - { path: '^/patient', roles: [ROLE_PATIENT,ROLE_ADMIN] }
+        - { path: '^/doctor', roles: [ROLE_DOCTOR,ROLE_ADMIN] }
+        # require ROLE_ADMIN for /admin*
+        # - { path: '^/users', roles: ROLE_ADMIN }
+
+        # or require ROLE_ADMIN or IS_AUTHENTICATED_FULLY for /admin*
+        # - { path: '^/admin', roles: [IS_AUTHENTICATED_FULLY,] }
+
+        # the 'path' value can be any valid regular expression
+        # (this one will match URLs like /api/post/7298 and /api/comment/528491)
+        # - { path: ^/api/(post|comment)/\d+$, roles: ROLE_USER }
 
 when@test:
     security:

@@ -1,5 +1,9 @@
 # Project Health's : security
 
+> submission include a report under PDF format detailing your choices regarding
+> made with type script
+> cd report
+
 ## Symphony
 
 ### users
