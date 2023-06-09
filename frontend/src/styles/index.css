@@ -65,3 +65,12 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+.red_btn{
+  background-color: white;
+  color: #BD0E3A!important;
+}
+
+.red_btn:hover{
+  color: #BD0E3A;
+}
