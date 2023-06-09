@@ -1,6 +1,8 @@
 <?php
 
 
+namespace App\Utils;
+
 class CheckInjection
 {
     // create function check is injection code
@@ -15,12 +17,15 @@ class CheckInjection
                       |proc_open|pcntl_exec|eval|assert|include|require|include_once|require_once|
                       call_user_func|call_user_func_array|create_function|$_GET|$_POST|
                       $_REQUEST|$_COOKIE|$_FILES|$_SESSION|$_ENV|$_SERVER|preg_replace|preg_filter',
-            'xss' => '/(<|>|\'|"|;|&|`|\/|\?|%|#|\*|!|\^|\(|\)|{|}|\[|\]|~|\\\\)/');
+            'xss' => '/(<|>|\'|"|;|&|`|\/|\?|%|#|\*|!|\^|\(|\)|{|}|\[|\]|~|\\\\)/',
+        );
 
         foreach ($injection as $key => $value) {
-            if (preg_match($value, $data))
+            if (preg_match($value, $data)) {
                 return true;
+            }
         }
+
         return false;
     }
 }

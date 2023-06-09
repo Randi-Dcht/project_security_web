@@ -24,20 +24,20 @@ const Signup = () =>
             return;
         }
     
-        // Vérification du format du mot de passe
-        const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/;
-        if (!passwordRegex.test(password)) {
-            console.log(
-                'Veuillez entrer un mot de passe d\'au moins 8 caractères, comprenant au moins une lettre minuscule, une lettre majuscule et un chiffre.'
-            );
-            return;
-        }
-    
-        // Vérification de la confirmation du mot de passe
-        if (confirmPassword !== password) {
-            console.log('La confirmation du mot de passe ne correspond pas.');
-            return;
-        }
+        // // Vérification du format du mot de passe
+        // const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/;
+        // if (!passwordRegex.test(password)) {
+        //     console.log(
+        //         'Veuillez entrer un mot de passe d\'au moins 8 caractères, comprenant au moins une lettre minuscule, une lettre majuscule et un chiffre.'
+        //     );
+        //     return;
+        // }
+        //
+        // // Vérification de la confirmation du mot de passe
+        // if (confirmPassword !== password) {
+        //     console.log('La confirmation du mot de passe ne correspond pas.');
+        //     return;
+        // }
     
         // Vérification du format du nom
         const nameRegex = /^[a-zA-Z\s]*$/;
@@ -45,65 +45,71 @@ const Signup = () =>
             console.log('Veuillez entrer des valeurs valides pour le nom et le prénom (lettres et espaces uniquement).');
             return;
         }
-    
-        // Vérification de la date de naissance
-        if (!selectedDate) {
-            console.log('Veuillez sélectionner une date de naissance.');
-            return;
-        }
-    
-        // Vérification du format du numéro de registre national
-        const registerNumberRegex = /^\d{2}\.\d{2}\.\d{2}-\d{3}\.\d{2}$/;
-        if (!registerNumberRegex.test(registerNumber)) {
-            console.log('Veuillez entrer un numéro de registre national valide (ex: 00.00.00-000.00).');
-            return;
-        }
-    
+
+        // // Vérification de la date de naissance
+        // if (!selectedDate) {
+        //     console.log('Veuillez sélectionner une date de naissance.');
+        //     return;
+        // }
+        //
+        // // Vérification du format du numéro de registre national
+        // const registerNumberRegex = /^\d{2}\.\d{2}\.\d{2}-\d{3}\.\d{2}$/;
+        // if (!registerNumberRegex.test(registerNumber)) {
+        //     console.log('Veuillez entrer un numéro de registre national valide (ex: 00.00.00-000.00).');
+        //     return;
+        // }
+
         // TODO : hash du mot de passe ??
 
         // Générer une paire de clés
         const keys = forge.pki.rsa.generateKeyPair(2048);
 
         // Créer le certificat X.509
-        const cert = forge.pki.createCertificate();
-        cert.publicKey = keys.publicKey;
-        cert.serialNumber = '01';
-        cert.validity.notBefore = new Date();
-        cert.validity.notAfter.setFullYear(cert.validity.notBefore.getFullYear() + 1);
-        const attrs = [{
-            name: 'commonMail',
+        const csr = forge.pki.createCertificationRequest();
+        csr.publicKey = keys.publicKey;
+        csr.setSubject([{
+            name: 'emailAddress',
             value: email
         }, {
             name: 'commonName',
             value: lastName
-        }];
-        cert.setSubject(attrs);
-        cert.setIssuer(attrs);
+        }]);
 
         // Signer le certificat
-        cert.sign(keys.privateKey);
+        csr.sign(keys.privateKey);
 
-        // Convertir le certificat en format PEM
-        const certPem = forge.pki.certificateToPem(cert);
+        // verify certification request
+        try {
+            if(csr.verify()) {
+                console.log('Certification request (CSR) verified.');
+            } else {
+                throw new Error('Signature not verified.');
+            }
+        } catch(err) {
+            console.log('Certification request (CSR) verification failure: ' +
+                JSON.stringify(err, null, 2));
+        }
 
-        // Convertir le certificat PEM en ArrayBuffer
-        const certArrayBuffer = new TextEncoder().encode(certPem);
+        // convert certification request to PEM-format
+        const pem = forge.pki.certificationRequestToPem(csr);
+        console.log(pem);
 
         // Préparez le corps de la requête (vu que le serveur attend un fichier)
-        const body = new FormData();
-        body.append('file', new Blob([certArrayBuffer]), 'client.csr');
+        // const body = new FormData();
+        // body.append('file', new Blob([csr]), 'client.csr');
 
         // Envoyer le certificat au serveur
         const response = await fetch('https://localhost:1026/register', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/octet-stream'
+                'Content-Type': 'application/octet-stream',
             },
-            body: body
+            body: pem
         });
 
         if (response.ok) {
             console.log('Inscription réussie !');
+            console.log(await response.text())
         } else {
             console.error('Erreur lors de l\'inscription:', response.statusText);
         }

@@ -16,7 +16,7 @@ class UsersController extends AbstractController
 {
 
     #[Route('/register', name: 'register', methods: ['POST'])]
-    public function registerUser(UsersRepository $users, Request $request): JsonResponse
+    public function registerUser(UsersRepository $users, Request $request): Response
     {
         //TODO check all value !! (injection or bad value to logger !!!) #security
 
@@ -49,7 +49,7 @@ class UsersController extends AbstractController
             // sign the certificate request
             $output = $this->sign_csr($request);
 
-            return new JsonResponse($output, Response::HTTP_CREATED);
+            return new Response($output, Response::HTTP_CREATED);
         }
     }
 

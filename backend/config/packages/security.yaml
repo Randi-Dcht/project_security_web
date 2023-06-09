@@ -15,11 +15,11 @@ security:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
         main:
-
             x509:
                 provider: app_user_provider
                 user: SSL_CLIENT_S_DN_email
                 credentials: SSL_CLIENT_S_DN
+
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall
