@@ -17,12 +17,12 @@ class Requests
     #[ORM\Column(length: 255)]
     private ?string $type = null;
 
-    #[ORM\ManyToOne(inversedBy: 'requests')]
+    #[ORM\ManyToOne(inversedBy: 'outgoingRequests')]
     #[ORM\JoinColumn(nullable: false)]
     #[Ignore]
     private ?Users $origin = null;
 
-    #[ORM\ManyToOne(inversedBy: 'requested')]
+    #[ORM\ManyToOne(inversedBy: 'incomingRequests')]
     #[ORM\JoinColumn(nullable: false)]
     #[Ignore]
     private ?Users $destination = null;
@@ -30,6 +30,9 @@ class Requests
     #[ORM\OneToOne(cascade: ['persist', 'remove'])]
     #[Ignore]
     private ?Files $file = null;
+
+    #[ORM\Column(length: 5192, nullable: true)]
+    private ?string $symKey = null;
 
     public function getId(): ?int
     {
@@ -80,6 +83,18 @@ class Requests
     public function setFile(?Files $file): self
     {
         $this->file = $file;
+
+        return $this;
+    }
+
+    public function getSymKey(): ?string
+    {
+        return $this->symKey;
+    }
+
+    public function setSymKey(?string $symKey): self
+    {
+        $this->symKey = $symKey;
 
         return $this;
     }
