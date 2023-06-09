@@ -7,33 +7,6 @@ const UserPage = () => {
   const [records, setRecords] = useState(["Record 1", "Record 2"]);
   const [file, setFile] = useState(null);
 
-
-  const tmpKey = `-----BEGIN PUBLIC KEY-----
-MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAy3Xo3U13dc+xojwQYWoJLCbOQ5fOVY8LlnqcJm1W1BFtxIhOAJWohiHuIRMctv7dzx47TLlmARSKvTRjd0dF92jx/xY20Lz+DXp8YL5yUWAFgA3XkO3LSJgEOex10NB8jfkmgSb7QIudTVvbbUDfd5fwIBmCtaCwWx7NyeWWDb7A9cFxj7EjRdrDaK3ux/ToMLHFXVLqSL341TkCf4ZQoz96RFPUGPPLOfvN0x66CM1PQCkdhzjE6U5XGE964ZkkYUPPsy6Dcie4obhW4vDjgUmLzv0z7UD010RLIneUgDE2FqBfY/C+uWigNPBPkkQ+Bv/UigS6dHqTCVeD5wgyBQIDAQAB
------END PUBLIC KEY-----`;
-
-  /*function removeLines(str) {
-    return str.replace("\n", "");
-  }
-
-  function base64ToArrayBuffer(b64) {
-    const byteString = window.atob(b64);
-    const byteArray = new Uint8Array(byteString.length);
-    for(var i=0; i < byteString.length; i++) {
-      byteArray[i] = byteString.charCodeAt(i);
-    }
-
-    return byteArray;
-  }
-
-  function pemToArrayBuffer(pem) {
-    const b64Lines = removeLines(pem);
-    const b64Prefix = b64Lines.replace('-----BEGIN PUBLIC KEY-----', '');
-    const b64Final = b64Prefix.replace('-----END PUBLIC KEY-----', '');
-
-    return base64ToArrayBuffer(b64Final);
-  }*/
-
   const handleUserUpdate = () => {
     // TODO : logique pour modifier les informations de l'utilisateur
   };
@@ -58,32 +31,6 @@ MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAy3Xo3U13dc+xojwQYWoJLCbOQ5fOVY8Llnqc
 
   const handleFileSubmit = () => {
     // TODO : logique pour soumettre le fichier
-    /*const f = new Blob(file[0])
-    const data = await f.arrayBuffer();
-
-
-    const key_encoded = await window.crypto.subtle.importKey(
-        "pkcs8",
-        pemToArrayBuffer(tmpKey),
-        {
-          name: "RSA-OAEP",
-          hash: {name: "SHA-256"} // or SHA-512
-        },
-        true,
-        ["encrypt","decrypt"]
-    ).then(function(importedPrivateKey) {
-      console.log(importedPrivateKey);
-    }).catch(function(err) {
-      console.log(err);
-    });
-
-    const encrypt_file = await window.crypto.subtle.encrypt(
-        {
-          name: "RSA-OAEP"
-        },
-        key_encoded,
-        data
-    );*/
 
     const reader = new FileReader();
     reader.onload = () => {
