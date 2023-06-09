@@ -1,7 +1,6 @@
 import React, {useEffect, useState } from 'react';
 import '../../styles/DoctorPage.css';
-import axios from 'axios';
-import https from 'https';
+
 
 const AdminPage = () => {
   const [users, setUsers] = useState(['User 1', 'User 2', 'User 3']);
@@ -11,11 +10,12 @@ const AdminPage = () => {
     const fetchData = async () => {
       try {
         const response = await fetch('https://localhost:1026/users/list', {
-            method: 'GET'
+            method: 'GET',
+            credentials: 'include'
         });
 
         setData(response.data);
-        console.log(response.data);
+        console.log(await response.text());
       } catch (error) {
         console.error('Erreur lors de la requête HTTPS:', error);
       }

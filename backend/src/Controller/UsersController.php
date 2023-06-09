@@ -48,25 +48,25 @@ class UsersController extends AbstractController
             $key_info = openssl_pkey_get_details($public_key);
             $info["public_key"] = $key_info['key'];
 
-            $this->addUser($info, $roles, $users);
+            $user = $this->addUser($info, $roles, $users);
 
             // sign the certificate request
-            $output = $this->sign_csr($request);
+            $output = $this->sign_csr($request, $user->getUserIdentifier());
 
             return new Response($output, Response::HTTP_CREATED);
         }
     }
 
-    private function sign_csr(string $request) :string{
+    private function sign_csr(string $request, string $id) :string{
         $path = $this->getParameter('kernel.project_dir');
         $cacert = "file://" . $path . "/cert/ca.crt";
         $privkey = "file://" . $path . "/cert/ca.key";
-        $signed = openssl_csr_sign($request, $cacert, $privkey, 365, array('digest_alg'=>'sha256') );
+        $signed = openssl_csr_sign($request, $cacert, $privkey, 365, array('digest_alg'=>'sha256'), intval($id));
         openssl_x509_export($signed,$output);
         return $output;
     }
 
-    public function addUser(array $info, array $role,UsersRepository $usersRepository): void
+    public function addUser(array $info, array $role,UsersRepository $usersRepository): Users
     {
         $myId = date('y') . random_int(11, 999) . $usersRepository->count([]);
         $user = new Users();
@@ -77,6 +77,7 @@ class UsersController extends AbstractController
         $user->setRoles($role);
         $user->setDateSignUp(time());
         $usersRepository->save($user, true);
+        return $user;
     }
 
 //    #[Route('/revoke', name: 'revoke_cert', methods: ['POST'])]
