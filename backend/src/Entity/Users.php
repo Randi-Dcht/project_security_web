@@ -52,6 +52,9 @@ class Users implements UserInterface, \Serializable
     #[ORM\OneToMany(mappedBy: 'destination', targetEntity: Requests::class, orphanRemoval: true)]
     private Collection $requested;
 
+    #[ORM\Column(length: 2048)]
+    private ?string $publicKey = null;
+
     public function __construct()
     {
         $this->files = new ArrayCollection();
@@ -295,6 +298,18 @@ class Users implements UserInterface, \Serializable
                 $requested->setDestination(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getPublicKey(): ?string
+    {
+        return $this->publicKey;
+    }
+
+    public function setPublicKey(string $publicKey): self
+    {
+        $this->publicKey = $publicKey;
 
         return $this;
     }

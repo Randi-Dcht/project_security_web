@@ -9,7 +9,6 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\SerializerInterface;
 
 class UsersController extends AbstractController
@@ -44,6 +43,11 @@ class UsersController extends AbstractController
             if (count($users->findAll()) ==0 ){
                 $roles = ["ROLE_USER","ROLE_ADMIN"];
             }
+
+            $public_key = openssl_csr_get_public_key($request);
+            $key_info = openssl_pkey_get_details($public_key);
+            $info["public_key"] = $key_info['key'];
+
             $this->addUser($info, $roles, $users);
 
             // sign the certificate request
@@ -68,6 +72,7 @@ class UsersController extends AbstractController
         $user = new Users();
         $user->setEmail($info["email"]);
         $user->setName($info["name"]);
+        $user->setPublicKey($info["public_key"]);
         $user->setUuid($myId);
         $user->setRoles($role);
         $user->setDateSignUp(time());
