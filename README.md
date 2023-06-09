@@ -60,12 +60,12 @@ scripts)
 > 
 >   By default, docker will use :
 > 
->   - port 9000 for symphony (symfony_dockerized-php-1)
+>   - port 1026 for php symphony (symfony_dockerized-php-1)
 >   - port 3306 for mariadb (symfony_dockerized-db-1)
 > 
->   please verify using `sudo netstat -nlpt |grep [port number]` if those ports are free, 
+>   please verify using `sudo netstat -nlpt` if those ports are free, 
 > 
->   if not you can use `sudo service [service using 3306] stop`to free port 3306
+>   if not you can use `sudo service [service using a needed port] stop` to free port 3306
 > 
 > _ps. You can follow the instruction in the readme there (you can use Podman or Docker)_
 
