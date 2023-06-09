@@ -42,13 +42,14 @@ const UserPage = () => {
 
       const a = document.createElement("a");
       const url = window.URL.createObjectURL(fileEnc);
-      const filename = file.name + ".enc";
+      const filename = "a" + ".enc";
       a.href = url;
       a.download = filename;
       a.click();
       window.URL.revokeObjectURL(url);
     };
     reader.readAsArrayBuffer(document.querySelector('input').files[0]);
+
   };
 
   return (
