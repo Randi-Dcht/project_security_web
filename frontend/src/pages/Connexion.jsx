@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import {useNavigate} from "react-router-dom";
+import forge from 'node-forge';
 
 const Connexion = () => {
     const navigate = useNavigate();
@@ -7,31 +8,23 @@ const Connexion = () => {
     const [password, setPassword] = useState('');
 
     const handleConnexionClick = () => {
-        // Vérification du format de l'adresse e-mail
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
-            alert('Veuillez entrer une adresse e-mail valide.\n \
-            Format attendu : exemple@exemple.exe\n \
-            Format reçu : ' + email);
-            return;
-        }
 
-        // Vérification du format du mot de passe
-        const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/;
-        if (!passwordRegex.test(password)) {
-            alert(
-                'Veuillez entrer un mot de passe d\'au moins 8 caractères, comprenant au moins une lettre minuscule, une lettre majuscule et un chiffre.'
-            );
-            return;
-        }
+        const { publicKey, privateKey } = forge.pki.rsa.generateKeyPair(2048);
 
-        // TODO : envoyer les données au serveur
-        console.log('Email:', email);
-        console.log('Mot de passe:', password);
+        const message = email;
 
-        // TODO : vérifier le type de compte (patient/médecin/admin)
+        const encrypted = publicKey.encrypt(message, 'RSA-OAEP');
 
-        navigate('/doctor');
+        console.log(encrypted);
+        //change the input field text to the encrypted text
+
+        document.getElementById('input').value = encrypted;
+
+        const decrypted = privateKey.decrypt(encrypted, 'RSA-OAEP');
+
+        console.log(decrypted);
+
+        document.getElementById('output').value = decrypted;
     };
 
     return (
@@ -39,7 +32,7 @@ const Connexion = () => {
             <h2 className="title is-2">Connexion :</h2>
 
             <div className="field">
-                <label className="label">Email</label>
+                <label className="label">Message</label>
                 <div className="control">
                     <input
                         className="input form-field"
@@ -52,17 +45,28 @@ const Connexion = () => {
             </div>
 
             <div className="field">
-                <label className="label">Mot de passe</label>
+                <label className="label">Chiffre</label>
                 <div className="control">
                     <input
                         className="input form-field"
-                        type="password"
-                        placeholder="********"
-                        value={password}
+                        type="email"
+                        id="input"
                         onChange={(e) => setPassword(e.target.value)}
                     />
                 </div>
             </div>
+
+            <div className="field">
+                <label className="label">Dechiffre</label>
+                <div className="control">
+                    <input
+                        className="input form-field"
+                        type="email"
+                        id="output"
+                    />
+                </div>
+            </div>
+
 
             <button onClick={handleConnexionClick}>Connexion</button>
         </div>
