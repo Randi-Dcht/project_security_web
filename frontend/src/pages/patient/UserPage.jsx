@@ -67,6 +67,7 @@ const UserPage = () => {
   const handleFileSubmit = () => {
     // TODO : logique pour soumettre le fichier
 
+
     const reader = new FileReader();
     reader.onload = () => {
       const key = "testkey0123";
@@ -85,6 +86,8 @@ const UserPage = () => {
     };
     reader.readAsArrayBuffer(document.querySelector('input').files[0]);
 
+    const cryptFileName = encryptText(file.name.substr(0,file.name.length - 4),"testkey0123");
+    console.log(cryptFileName)
   };
 
   const handleDecryptFile = () =>{
