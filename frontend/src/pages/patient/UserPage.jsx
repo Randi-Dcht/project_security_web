@@ -31,6 +31,17 @@ const UserPage = () => {
     return result;
   }
 
+  const encryptText = (text, secretKey) => {
+    const encryptedText = CryptoJS.AES.encrypt(text, secretKey).toString();
+    return encryptedText;
+  }
+
+  const decryptText = (encryptedText, secretKey) => {
+    const bytes = CryptoJS.AES.decrypt(encryptedText, secretKey);
+    const decryptedText = bytes.toString(CryptoJS.enc.Utf8);
+    return decryptedText;
+  }
+
   const handleUserUpdate = () => {
     // TODO : logique pour modifier les informations de l'utilisateur
   };
