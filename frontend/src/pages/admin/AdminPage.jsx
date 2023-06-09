@@ -1,8 +1,29 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState } from 'react';
 import '../../styles/DoctorPage.css';
+import axios from 'axios';
+import https from 'https';
 
 const AdminPage = () => {
   const [users, setUsers] = useState(['User 1', 'User 2', 'User 3']);
+  const [data, setData] = useState(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch('https://localhost:1026/users/list', {
+            method: 'GET'
+        });
+
+        setData(response.data);
+        console.log(response.data);
+      } catch (error) {
+        console.error('Erreur lors de la requête HTTPS:', error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
 
   const handleSecurityUpdate = () => {
       // TODO : logique pour modifier les informations lié à la sécurité de l'utilisateur
