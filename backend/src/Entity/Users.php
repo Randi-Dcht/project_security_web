@@ -47,10 +47,10 @@ class Users implements UserInterface, \Serializable
     private Collection $patient;
 
     #[ORM\OneToMany(mappedBy: 'origin', targetEntity: Requests::class, orphanRemoval: true)]
-    private Collection $requests;
+    private Collection $outgoingRequests;
 
     #[ORM\OneToMany(mappedBy: 'destination', targetEntity: Requests::class, orphanRemoval: true)]
-    private Collection $requested;
+    private Collection $incomingRequests;
 
     #[ORM\Column(length: 2048)]
     private ?string $publicKey = null;
@@ -60,8 +60,8 @@ class Users implements UserInterface, \Serializable
         $this->files = new ArrayCollection();
         $this->patient = new ArrayCollection();
         $this->doctor = new ArrayCollection();
-        $this->requests = new ArrayCollection();
-        $this->requested = new ArrayCollection();
+        $this->outgoingRequests = new ArrayCollection();
+        $this->incomingRequests = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -245,15 +245,15 @@ class Users implements UserInterface, \Serializable
     /**
      * @return Collection<int, Requests>
      */
-    public function getRequests(): Collection
+    public function getOutgoingRequests(): Collection
     {
-        return $this->requests;
+        return $this->outgoingRequests;
     }
 
     public function addRequest(Requests $request): self
     {
-        if (!$this->requests->contains($request)) {
-            $this->requests->add($request);
+        if (!$this->outgoingRequests->contains($request)) {
+            $this->outgoingRequests->add($request);
             $request->setOrigin($this);
         }
 
@@ -262,7 +262,7 @@ class Users implements UserInterface, \Serializable
 
     public function removeRequest(Requests $request): self
     {
-        if ($this->requests->removeElement($request)) {
+        if ($this->outgoingRequests->removeElement($request)) {
             // set the owning side to null (unless already changed)
             if ($request->getOrigin() === $this) {
                 $request->setOrigin(null);
@@ -275,15 +275,15 @@ class Users implements UserInterface, \Serializable
     /**
      * @return Collection<int, Requests>
      */
-    public function getRequested(): Collection
+    public function getIncomingRequests(): Collection
     {
-        return $this->requested;
+        return $this->incomingRequests;
     }
 
     public function addRequested(Requests $requested): self
     {
-        if (!$this->requested->contains($requested)) {
-            $this->requested->add($requested);
+        if (!$this->incomingRequests->contains($requested)) {
+            $this->incomingRequests->add($requested);
             $requested->setDestination($this);
         }
 
@@ -292,7 +292,7 @@ class Users implements UserInterface, \Serializable
 
     public function removeRequested(Requests $requested): self
     {
-        if ($this->requested->removeElement($requested)) {
+        if ($this->incomingRequests->removeElement($requested)) {
             // set the owning side to null (unless already changed)
             if ($requested->getDestination() === $this) {
                 $requested->setDestination(null);
