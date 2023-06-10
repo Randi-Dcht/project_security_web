@@ -15,13 +15,15 @@ const DoctorPage = () => {
   const handlePatientAdd = () => {
     // TODO : logique pour ajouter un patient
   };
+
   const handleFileUpload = (event) => {
+    // Afficher le fichier d'un patient
     setSelectedFile(event.target.files[0]);
   };
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    // Envoyer le fichier au serveur
+    // Envoyer la demande au patient de modifier un fichier
     console.log(selectedFile);
   };
 
