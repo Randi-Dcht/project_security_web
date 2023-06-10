@@ -173,6 +173,16 @@ class UsersController extends AbstractController
         return new JsonResponse(null, Response::HTTP_OK);
     }
 
+    #[Route('/users/unmakeDoctor/{uuid}', name: 'doctor_unmake', methods: ['POST'])]
+    public function unmakeDoctor(Users $user, UsersRepository $usersRepository): JsonResponse
+    {
+        if (in_array("ROLE_DOCTOR", $user->getRoles())){
+            $user->removeRole("ROLE_DOCTOR");
+            $usersRepository->save($user,true);
+        }
+        return new JsonResponse(null, Response::HTTP_OK);
+    }
+
     #[Route('/patient/addDoctor/{uuid}', name: 'doctor_add', methods: ['POST'])]
     public function addDoctor(Users $doctor, UsersRepository $users): JsonResponse
     {
@@ -223,6 +233,33 @@ class UsersController extends AbstractController
         $user = $serializer->serialize($user, 'json');
 
         return new JsonResponse($user, Response::HTTP_OK,[], true);
+
+    }
+
+    #[Route('/patient/doctorList', name: 'patient_doctor', methods: ['GET'])]
+    public function patient_doctor(UsersRepository $users, SerializerInterface $serializer): JsonResponse
+    {
+        $id = $this->getUser()->getUserIdentifier();
+        $user = $users->findOneBy(["uuid" => $id]);
+        $patient = $user->getDoctor()->map(function (Users $user) {
+            return ["uuid" => $user->getUserIdentifier(), "name" => $user->getName()];
+        } );
+        $patient = $serializer->serialize($patient, 'json');
+
+        return new JsonResponse($patient, Response::HTTP_OK,[], true);
+
+    }
+    #[Route('/doctor/patientsList', name: 'doctor_patient', methods: ['GET'])]
+    public function doctor_patient(UsersRepository $users, SerializerInterface $serializer): JsonResponse
+    {
+        $id = $this->getUser()->getUserIdentifier();
+        $user = $users->findOneBy(["uuid" => $id]);
+        $patient = $user->getPatient()->map(function (Users $user) {
+            return ["uuid" => $user->getUserIdentifier(), "name" => $user->getName()];
+        } );
+        $patient = $serializer->serialize($patient, 'json');
+
+        return new JsonResponse($patient, Response::HTTP_OK,[], true);
 
     }
 
