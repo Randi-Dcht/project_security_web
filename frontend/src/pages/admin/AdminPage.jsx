@@ -51,9 +51,14 @@ const AdminPage = () => {
     fetchData();
   }, []);
 
-  const handleApproveUser = (user) => {
-    // Approuver l'utilisateur
-    console.log(`Approuver ${user.name}`);
+  const handleApproveAdmin = async (user) => {
+    // Approuver l'admin
+    const response = await fetch('https://localhost:1026/users/makeAdmin/' + user.uuid, {
+      method: 'POST',
+      credentials: 'include'
+    });
+    console.log(`Approuver en tant qu'admin ${user.name}`);
+    window.location.reload();
   };
 
   const handleRemoveDoctorRole = async (user) => {
@@ -93,7 +98,7 @@ const AdminPage = () => {
         <ul>
           {users.map((user, index) => (
             <li key={user.uuid}>
-              {user.name} <button onClick={() => handleDeleteUser(user)}>Supprimer</button> <button onClick={() => handleGiveDoctorRole(user)}>Donner le rôle de docteur</button> <button onClick={() => handleApproveUser(user)}>Approuver</button>
+              {user.name} <button onClick={() => handleDeleteUser(user)}>Supprimer</button> <button onClick={() => handleGiveDoctorRole(user)}>Donner le rôle de docteur</button> <button onClick={() => handleApproveAdmin(user)}>Approuver</button>
             </li>
           ))}
         </ul>
