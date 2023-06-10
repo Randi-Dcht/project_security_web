@@ -82,26 +82,22 @@ const Signup = () =>
             // (requires the use of Triple DES instead of AES)
             const p12Asn1 = forge.pkcs12.toPkcs12Asn1(
                 keys.privateKey, crt, '',
-                {algorithm: '3des'});
+                //{algorithm: '3des'}
+            );
 
             // base64-encode p12
             const p12Der = forge.asn1.toDer(p12Asn1).getBytes();
             const p12b64 = forge.util.encode64(p12Der);
-
-            //console.log(p12b64);
 
 
             // create download link for p12
             const link = document.createElement('a');
             link.setAttribute('href', 'data:application/x-pkcs12;base64,' + p12b64);
             link.setAttribute("download", "your_identity.p12");
-
             // Append to html link element page
             document.body.appendChild(link);
-
             // Start download
             link.click();
-
             // Clean up and remove the link
             link.parentNode.removeChild(link);
 

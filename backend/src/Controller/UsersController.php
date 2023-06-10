@@ -169,6 +169,19 @@ class UsersController extends AbstractController
         }
     }
 
+    #[Route('/patient/doctorPublic/{uuid}', name: 'doctor_public', methods: ['GET'])]
+    public function doctor_public(Users $doctor, UsersRepository $users): Response
+    {
+        if (in_array("ROLE_DOCTOR", $doctor->getRoles())){
+            $key = $doctor->getPublicKey();
+
+            return new Response($key, Response::HTTP_OK);
+        }else{
+            return new Response(null, Response::HTTP_BAD_REQUEST);
+        }
+
+    }
+
     #[Route('/me', name: 'me', methods: ['GET'])]
     public function me(UsersRepository $users, SerializerInterface $serializer): JsonResponse
     {

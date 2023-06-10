@@ -27,6 +27,7 @@ class RequestsController extends AbstractController
             $request->setType("PATIENT");
             $request->setDestination($patient);
             $request->setOrigin($user);
+            $request->setSymKey($user->getPublicKey());
 
             $requests->save($request,true);
 
