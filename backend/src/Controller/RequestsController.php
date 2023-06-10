@@ -6,6 +6,7 @@ use App\Entity\Requests;
 use App\Entity\Users;
 use App\Repository\RequestsRepository;
 use App\Repository\UsersRepository;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -14,6 +15,13 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class RequestsController extends AbstractController
 {
+    private LoggerInterface $logger;
+
+    public function __construct(LoggerInterface $logger)
+    {
+        $this->logger = $logger;
+    }
+
     #[Route('/requests/patient/{uuid}', name: 'request_patient', methods: ["POST"])]
     public function request_patient(Users $patient,RequestsRepository $requests, UsersRepository $users): JsonResponse
     {
@@ -31,9 +39,12 @@ class RequestsController extends AbstractController
 
             $requests->save($request,true);
 
+            $this->logger->info("Request sent to patient: " . $patient->getUuid() . " from doctor: " . $user->getUuid());
+
             return new JsonResponse(null, Response::HTTP_OK);
         }
 
+        $this->logger->error("Request failed to send to patient: " . $patient->getUuid() . " from doctor: " . $user->getUuid());
         return new JsonResponse(null, Response::HTTP_BAD_REQUEST);
     }
 
@@ -61,9 +72,10 @@ class RequestsController extends AbstractController
             }
 
             $requests->remove($request,true);
+            $this->logger->info("Request accepted by: " . $user->getUuid());
             return new JsonResponse(null, Response::HTTP_OK);
         }
-
+        $this->logger->error("Request failed to accept by: " . $user->getUuid());
         return new JsonResponse(null, Response::HTTP_BAD_REQUEST);
     }
 
@@ -81,11 +93,12 @@ class RequestsController extends AbstractController
             $request->setSymKey($key->getContent());
 
             $requests->save($request,true);
+            $this->logger->info("Key sent to doctor: " . $doctor->getUuid() . " from patient: " . $user->getUuid());
 
             return new JsonResponse(null, Response::HTTP_OK);
         }
 
-
+        $this->logger->error("Key failed to send to doctor: " . $doctor->getUuid() . " from patient: " . $user->getUuid());
         return new JsonResponse(null, Response::HTTP_BAD_REQUEST);
     }
 }

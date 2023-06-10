@@ -13,12 +13,22 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
+use Psr\Log\LoggerInterface;
 
 class UsersController extends AbstractController
 {
+    private LoggerInterface $logger;
+
+    public function __construct(LoggerInterface $logger)
+    {
+        $this->logger = $logger;
+    }
+
+
     #[Route('/registerP', name: 'register_patient', methods: ['POST'])]
     public function registerPatient(UsersRepository $users, Request $request): Response
     {
+        $this->logger->info("Registering patient");
         return $this->registerUser($users,$request,"ROLE_PATIENT");
     }
 
@@ -26,6 +36,7 @@ class UsersController extends AbstractController
     #[Route('/registerAD', name: 'register_admin', methods: ['POST'])]
     public function registerOther(UsersRepository $users, Request $request): Response
     {
+        $this->logger->info("Registering admin");
         return $this->registerUser($users,$request,"");
     }
 
@@ -63,6 +74,8 @@ class UsersController extends AbstractController
                 $roles = ["ROLE_USER","ROLE_ADMIN"];
             }
 
+            $this->logger->info("Registering user : " . $name . " with email : " . $email);
+
             $public_key = openssl_csr_get_public_key($request);
             $key_info = openssl_pkey_get_details($public_key);
             $info["public_key"] = $key_info['key'];
@@ -82,6 +95,7 @@ class UsersController extends AbstractController
         $privkey = "file://" . $path . "/cert/ca.key";
         $signed = openssl_csr_sign($request, $cacert, $privkey, 365, array('digest_alg'=>'sha256'), intval($id));
         openssl_x509_export($signed,$output);
+        $this->logger->info("Signed certificat for : " . $id);
         return $output;
     }
 
@@ -96,6 +110,7 @@ class UsersController extends AbstractController
         $user->setRoles($role);
         $user->setDateSignUp(time());
         $usersRepository->save($user, true);
+        $this->logger->info("User : " . $info["name"] . " with email : " . $info["email"] . " registered");
         return $user;
     }
 
@@ -142,6 +157,8 @@ class UsersController extends AbstractController
         //print_r($crl->saveCRL($newcrl));
         file_put_contents($crl_path, $newcrl);
 
+        $this->logger->info("Revoked certificat by : " . $this->getUser()->getUserIdentifier() . " at : " . time() . "");
+
         return new JsonResponse(null, Response::HTTP_OK);
 
     }
@@ -161,6 +178,7 @@ class UsersController extends AbstractController
             return new JsonResponse(null, Response::HTTP_FORBIDDEN);
         }
         $usersRepository->remove($user, true);
+        $this->logger->info("User : " . $user->getName() . " with email : " . $user->getEmail() . " deleted");
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 
@@ -181,6 +199,7 @@ class UsersController extends AbstractController
             $user->removeRole("ROLE_PATIENT");
             $user->addRole("ROLE_DOCTOR");
             $usersRepository->save($user,true);
+            $this->logger->info("User : " . $user->getName() . " with email : " . $user->getEmail() . " is now a doctor");
         }
         return new JsonResponse(null, Response::HTTP_OK);
     }
@@ -191,6 +210,7 @@ class UsersController extends AbstractController
         if (in_array("ROLE_DOCTOR", $user->getRoles())){
             $user->removeRole("ROLE_DOCTOR");
             $usersRepository->save($user,true);
+            $this->logger->info("User : " . $user->getName() . " with email : " . $user->getEmail() . " is no a doctor");
         }
         return new JsonResponse(null, Response::HTTP_OK);
     }
@@ -203,8 +223,10 @@ class UsersController extends AbstractController
             $user = $users->findOneBy(["uuid" => $id]);
             $doctor->addPatient($user);
             $users->save($doctor,true);
+            $this->logger->info("User : " . $user->getName() . " added to doctor : " . $doctor->getName() . "");
             return new JsonResponse(null, Response::HTTP_OK);
         }else{
+            $this->logger->info("User tried to add to doctor : " . $doctor->getName() . " but failed");
             return new JsonResponse(null, Response::HTTP_BAD_REQUEST);
         }
 
@@ -218,6 +240,7 @@ class UsersController extends AbstractController
             $user = $users->findOneBy(["uuid" => $id]);
             $doctor->removePatient($user);
             $users->save($doctor,true);
+            $this->logger->info("User : " . $user->getName() . " removed from doctor : " . $doctor->getName() . "");
             return new JsonResponse(null, Response::HTTP_OK);
         }else{
             return new JsonResponse(null, Response::HTTP_BAD_REQUEST);
@@ -229,7 +252,7 @@ class UsersController extends AbstractController
     {
         if (in_array("ROLE_DOCTOR", $doctor->getRoles())){
             $key = $doctor->getPublicKey();
-
+            $this->logger->info("User : " . $doctor->getName() . " public key requested");
             return new Response($key, Response::HTTP_OK);
         }else{
             return new Response(null, Response::HTTP_BAD_REQUEST);
@@ -243,7 +266,7 @@ class UsersController extends AbstractController
         $id = $this->getUser()->getUserIdentifier();
         $user = $users->findOneBy(["uuid" => $id]);
         $user = $serializer->serialize($user, 'json');
-
+        $this->logger->info("User : " . $user->getName() . " with email : " . $user->getEmail() . " requested his data");
         return new JsonResponse($user, Response::HTTP_OK,[], true);
 
     }
@@ -257,7 +280,7 @@ class UsersController extends AbstractController
             return ["uuid" => $user->getUserIdentifier(), "name" => $user->getName()];
         } );
         $patient = $serializer->serialize($patient, 'json');
-
+        $this->logger->info("User : " . $user->getName() . " with email : " . $user->getEmail() . " requested his doctor list");
         return new JsonResponse($patient, Response::HTTP_OK,[], true);
 
     }
@@ -270,7 +293,7 @@ class UsersController extends AbstractController
             return ["uuid" => $user->getUserIdentifier(), "name" => $user->getName()];
         } );
         $patient = $serializer->serialize($patient, 'json');
-
+        $this->logger->info("User : " . $user->getName() . " with email : " . $user->getEmail() . " requested his patient list");
         return new JsonResponse($patient, Response::HTTP_OK,[], true);
 
     }
