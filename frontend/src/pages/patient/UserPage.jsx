@@ -86,8 +86,6 @@ const UserPage = () => {
       keySize: 128 / 32
     });
 
-    console.log(key.toString());
-
     const reader = new FileReader();
     reader.onload = () => {
 
@@ -116,9 +114,7 @@ const UserPage = () => {
   }
 
   const handleDecryptFile = () =>{
-
     const key = localStorage.getItem("key");
-    console.log(key);
     const reader = new FileReader();
     reader.onload = () => {
 
