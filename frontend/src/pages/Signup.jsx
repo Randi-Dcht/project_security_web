@@ -10,6 +10,7 @@ const Signup = () =>
     const [email, setEmail] = useState('');
     const [lastName, setLastName] = useState('');
     const [firstName, setFirstName] = useState('');
+    const [role, setRole] = useState('patient');
 
     const registerClick = async () => {
         // Vérification du format de l'adresse e-mail
@@ -64,8 +65,12 @@ const Signup = () =>
         // const body = new FormData();
         // body.append('file', new Blob([csr]), 'client.csr');
 
+        let url = 'https://localhost:1026/registerP';
+        if (role !== "patient"){
+            url = 'https://localhost:1026/registerAD'
+        }
         // Envoyer le certificat au serveur
-        const response = await fetch('https://localhost:1026/register', {
+        const response = await fetch(url, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/octet-stream',
@@ -132,7 +137,19 @@ const Signup = () =>
                     <input className="input form-field" type="text" placeholder="e.g. Alex" onChange={(event) => setFirstName(event.target.value)}/>
                 </div>
             </div>
+            <div className="field">
+                <label className="label">
+                    Votre rôle
+                </label>
+                <div className='select'>
+                    <select onChange={(e)=>  setRole(e.target.value)}  >
+                        <option value="patient">Patient</option>
+                        <option value="doctor">Docteur</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
 
+            </div>
 
             <button onClick={registerClick}>Inscription</button>
         </div>

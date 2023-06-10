@@ -182,6 +182,16 @@ class UsersController extends AbstractController
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 
+    #[Route('/users/makeAdmin/{uuid}', name: 'admin_create', methods: ['POST'])]
+    public function makeAdmin(Users $user, UsersRepository $usersRepository): JsonResponse
+    {
+        if (!in_array("ROLE_ADMIN", $user->getRoles())){
+            $user->addRole("ROLE_ADMIN");
+            $usersRepository->save($user,true);
+        }
+        return new JsonResponse(null, Response::HTTP_OK);
+    }
+
     #[Route('/users/makeDoctor/{uuid}', name: 'doctor_create', methods: ['POST'])]
     public function makeDoctor(Users $user, UsersRepository $usersRepository): JsonResponse
     {
