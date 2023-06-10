@@ -45,12 +45,22 @@ server {
     }
 
     location ~ ^(\/(users|patient|files|doctor|me|requests)\/?.*)$ { # Don't forget to change here with your own regex
+        if ($request_method = OPTIONS) {
+            return 204;
+        }
     	if ($ssl_client_verify != SUCCESS) {
     		return 403;
     		break;
     	}
+        add_header Access-Control-Allow-Origin $allow_origin;
+        add_header Access-Control-Allow-Credentials true;
+        add_header Access-Control-Max-Age 3600;
+        add_header Access-Control-Allow-Methods "OPTIONS, HEAD, GET, POST, DELETE";
 
         try_files $uri /index.php$is_args$args;
     }
 
+}
+map $http_origin $allow_origin {
+    ~^https?://(localhost|127\.0\.0\.1)(:[0-9]+)?$ $http_origin;
 }
