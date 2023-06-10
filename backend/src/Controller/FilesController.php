@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Files;
 use App\Repository\FilesRepository;
 use App\Repository\UsersRepository;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -15,6 +16,14 @@ use Vich\UploaderBundle\Handler\DownloadHandler;
 
 class FilesController extends AbstractController
 {
+
+    private LoggerInterface $logger;
+
+    public function __construct(LoggerInterface $logger)
+    {
+        $this->logger = $logger;
+    }
+
     #[Route('/files/upload', name: 'add_file', methods: ['POST'])]
     public function postFile(UsersRepository $users, FilesRepository $filesRepository, Request $request): JsonResponse
     {
@@ -32,6 +41,7 @@ class FilesController extends AbstractController
         $user = $users->findOneBy(["uuid" => $id]);
 
         $file->addAccess($user);
+        $this->logger->info("File uploaded by user: " . $user->getUuid());
 
         $filesRepository->save($file, true);
 
@@ -48,6 +58,7 @@ class FilesController extends AbstractController
         }
 
         $files->remove($file,true);
+        $this->logger->info("File deleted by user: " . $id);
 
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
@@ -60,6 +71,7 @@ class FilesController extends AbstractController
         $files = $user->getFiles();
 
         $files = $serializer->serialize($files, 'json');
+        $this->logger->info("File list requested by user: " . $id);
 
         return new JsonResponse($files, Response::HTTP_OK, [], true);
     }
@@ -69,8 +81,11 @@ class FilesController extends AbstractController
         $id = $this->getUser()->getUserIdentifier();
 
         if (!$this->hasAccess($id,$users,$file)){
+            $this->logger->info("File requested by user: " . $id . " but access denied");
             return new Response( null,Response::HTTP_FORBIDDEN);
         }
+
+        $this->logger->info("File requested by user: " . $id);
 
         return $downloadHandler->downloadObject($file, $file = 'file');
     }
@@ -78,6 +93,7 @@ class FilesController extends AbstractController
     private function hasAccess(int $id,UsersRepository $users,Files $file) :bool
     {
         $user = $users->findOneBy(["uuid" => $id]);
+        $this->logger->info("File requested by user: " . $id);
         return $file->hasAccess($user);
     }
 }
