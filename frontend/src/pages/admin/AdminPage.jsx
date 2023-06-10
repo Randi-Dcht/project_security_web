@@ -91,6 +91,7 @@ const AdminPage = () => {
             </li>
           ))}
         </ul>
+        <hr/>
         <h2>Tous les patients</h2>
         <ul>
           {patients.map((user, index) => (
@@ -99,6 +100,7 @@ const AdminPage = () => {
             </li>
           ))}
         </ul>
+        <hr/>
         <h2>Tous les admins</h2>
         <ul>
           {admins.map((user, index) => (
@@ -107,6 +109,7 @@ const AdminPage = () => {
             </li>
           ))}
         </ul>
+        <hr/>
         <h2>Tous les docteurs</h2>
         <ul>
           {doctors.map((user, index) => (
