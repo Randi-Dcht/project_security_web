@@ -17,9 +17,21 @@ use Symfony\Component\Serializer\SerializerInterface;
 
 class UsersController extends AbstractController
 {
+    #[Route('/registerP', name: 'register_patient', methods: ['POST'])]
+    public function registerPatient(UsersRepository $users, Request $request): Response
+    {
+        return $this->registerUser($users,$request,"ROLE_PATIENT");
+    }
 
-    #[Route('/register', name: 'register', methods: ['POST'])]
-    public function registerUser(UsersRepository $users, Request $request): Response
+
+    #[Route('/registerAD', name: 'register_admin', methods: ['POST'])]
+    public function registerOther(UsersRepository $users, Request $request): Response
+    {
+        return $this->registerUser($users,$request,"");
+    }
+
+
+    public function registerUser(UsersRepository $users, Request $request, string $role): Response
     {
         //TODO check all value !! (injection or bad value to logger !!!) #security
 
@@ -41,11 +53,15 @@ class UsersController extends AbstractController
             $name = $subject["CN"];
             $info["name"] = $name;
 
-            $roles = ["ROLE_USER","ROLE_PATIENT"];
+            $roles = ["ROLE_USER"];
+
+            if ($role != ""){
+                $roles[] = $role;
+            }
 
             //TODO remove that ?
             if (count($users->findAll()) ==0 ){
-                $roles = ["ROLE_USER","ROLE_ADMIN"];
+                $roles[] = "ROLE_ADMIN";
             }
 
             $public_key = openssl_csr_get_public_key($request);
