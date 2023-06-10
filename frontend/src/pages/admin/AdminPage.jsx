@@ -50,23 +50,28 @@ const AdminPage = () => {
   
     fetchData();
   }, []);
-  
-
-  const handleSecurityUpdate = () => {
-    // TODO : logique pour modifier les informations lié à la sécurité de l'utilisateur
-  };
 
   const handleApproveUser = (user) => {
     // Approuver l'utilisateur
     console.log(`Approuver ${user.name}`);
   };
 
-  const handleRemoveDoctorRole = (user) => {
+  const handleRemoveDoctorRole = async (user) => {
     // suppimer le rôle de docteur à l'utilisateur
+    const response = await fetch('https://localhost:1026/patient/removeDoctor/' + user.uuid, {
+            method: 'DELETE',
+            credentials: 'include'
+        });
+    console.log(`Supprimer le rôle de docteur à ${user.name}`);
   };
 
-  const handleGiveDoctorRole = (user) => {
+  const handleGiveDoctorRole = async (user) => {
     // donner le rôle de docteur à l'utilisateur
+    const response = await fetch('https://localhost:1026/users/makeDoctor/' + user.uuid, {
+            method: 'POST',
+            credentials: 'include'
+        });
+    console.log(`Donner le rôle de docteur à ${user.name}`);
   };
 
   const handleDeleteUser = async (user) => {
@@ -81,7 +86,6 @@ const AdminPage = () => {
   return (
     <div className="doctor-page">
       <h1>Page de l'Admin</h1>
-      <button className="red_btn" onClick={handleSecurityUpdate}>Modifier la sécurité</button>
       <section>
       <h2>Utilisateurs à valider</h2>
         <ul>
