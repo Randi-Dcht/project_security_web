@@ -5,7 +5,6 @@ namespace App\Controller;
 use App\Entity\Users;
 use App\Repository\UsersRepository;
 
-use phpseclib3\Crypt\DSA\PrivateKey;
 use phpseclib3\Crypt\PublicKeyLoader;
 use phpseclib3\File\X509;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
