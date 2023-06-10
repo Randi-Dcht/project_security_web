@@ -20,6 +20,8 @@ const Connexion = () => {
 
         });
 
+        console.log(response)
+
 
         if (response.ok && privateKey && message) {
 
