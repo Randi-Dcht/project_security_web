@@ -175,7 +175,7 @@ class UsersController extends AbstractController
         return new JsonResponse(null, Response::HTTP_OK);
     }
 
-    #[Route('/users/unmakeDoctor/{uuid}', name: 'doctor_unmake', methods: ['POST'])]
+    #[Route('/users/unmakeDoctor/{uuid}', name: 'doctor_unmake', methods: ['DELETE'])]
     public function unmakeDoctor(Users $user, UsersRepository $usersRepository): JsonResponse
     {
         if (in_array("ROLE_DOCTOR", $user->getRoles())){
