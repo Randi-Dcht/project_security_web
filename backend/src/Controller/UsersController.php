@@ -4,6 +4,10 @@ namespace App\Controller;
 
 use App\Entity\Users;
 use App\Repository\UsersRepository;
+
+use phpseclib3\Crypt\DSA\PrivateKey;
+use phpseclib3\Crypt\PublicKeyLoader;
+use phpseclib3\File\X509;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -80,39 +84,52 @@ class UsersController extends AbstractController
         return $user;
     }
 
-//    #[Route('/revoke', name: 'revoke_cert', methods: ['POST'])]
-//    public function revokeCert(UsersRepository $users, Request $request): JsonResponse
-//    {
-//        $path = $this->getParameter('kernel.project_dir');
-//        $cacert = "file://" . $path . "/cert/ca.crt";
-//        $privkey = "file://" . $path . "/cert/ca.key";
-//        $crl = "file://" . $path . "/cert/crl/pulp_crl.pem";
-//        $crl = file_get_contents($crl);
-//
-//        $x509 = new X509();
-//        $bob = "file://" . $path . "/cert//client.crt";
-//        $bob = $x509->loadX509(file_get_contents($bob));
-//        $sn = $bob["tbsCertificate"]["serialNumber"];
-//        $sn = $sn->toString();
-//
-//        $CAIssuer = new X509();
-//        $CAIssuer->loadCA(file_get_contents($cacert));
-//        $pk = PublicKeyLoader::loadPrivateKey(file_get_contents($privkey));
-//        $CAIssuer->setPrivateKey($pk);
-//
-//        $x509 = new x509();
-//        $crl = $x509->loadCRL($crl);
-//        $x509->unrevoke($sn);
-//        //$revoked = $x509->listRevoked($crl);
-//        //var_dump($revoked);
-//        $signed = $x509->signCRL($CAIssuer, $x509);
-//        print_r($signed);
-//        //$crl = $x509->saveCRL($signed);
-//        //print_r($crl);
-//
-//        return new JsonResponse(null, Response::HTTP_OK);
-//
-//    }
+    #[Route('/revoke', name: 'revoke_cert', methods: ['POST'])]
+    public function revokeCert(UsersRepository $users, Request $request): JsonResponse
+    {
+        $path = $this->getParameter('kernel.project_dir');
+
+        $cacert = "file://" . $path . "/cert/ca.crt";
+        $cacert = file_get_contents($cacert);
+
+        $privkey = "file://" . $path . "/cert/ca.key";
+        $cakey = file_get_contents($privkey);
+
+        $crl_path = "file://" . $path . "/cert/crl/crl.pem";
+        $pemcrl = file_get_contents($crl_path);
+
+
+        // Load the CA and its private key.
+        $cakey = PublicKeyLoader::loadPrivateKey($cakey);
+        $ca = new X509();
+        $ca->loadX509($cacert);
+        $ca->setPrivateKey($cakey);
+
+        // Load the CRL.
+        $crl = new X509();
+        $crl->loadCA($cacert); // For later signature check.
+        $crl->loadCRL($pemcrl);
+
+
+        // Validate the CRL.
+        if ($crl->validateSignature() !== 1) {
+            //exit("CRL signature is invalid\n");
+        }
+
+        // Update the revocation list.
+        $crl->setRevokedCertificateExtension('233751', 'id-ce-cRLReasons', 'privilegeWithdrawn');
+
+        // Generate the new CRL.
+        $crl->setEndDate('+3 months');
+        $newcrl = $crl->signCRL($ca, $crl);
+
+        // Output it.
+        //print_r($crl->saveCRL($newcrl));
+        file_put_contents($crl_path, $newcrl);
+
+        return new JsonResponse(null, Response::HTTP_OK);
+
+    }
 
     #[Route('/users/list', name: 'users_list', methods: ['GET'])]
     public function getListUser(UsersRepository $users_list, SerializerInterface $serializer): JsonResponse
