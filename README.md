@@ -39,6 +39,8 @@ scripts)
 > 
 >   `npm install --save react-bootstrap-validation` to install bootstrap
 > 
+>   `npm install --save vite-plugin-mkcert` to install https certificate support
+> 
 >   `npm run dev` to run npm
 >
 
