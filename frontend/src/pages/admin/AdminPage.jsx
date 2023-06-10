@@ -58,11 +58,12 @@ const AdminPage = () => {
 
   const handleRemoveDoctorRole = async (user) => {
     // suppimer le rôle de docteur à l'utilisateur
-    const response = await fetch('https://localhost:1026/patient/removeDoctor/' + user.uuid, {
+    const response = await fetch('https://localhost:1026/users/unmakeDoctor/' + user.uuid, {
             method: 'DELETE',
             credentials: 'include'
         });
     console.log(`Supprimer le rôle de docteur à ${user.name}`);
+    window.location.reload();
   };
 
   const handleGiveDoctorRole = async (user) => {
@@ -72,6 +73,7 @@ const AdminPage = () => {
             credentials: 'include'
         });
     console.log(`Donner le rôle de docteur à ${user.name}`);
+    window.location.reload();
   };
 
   const handleDeleteUser = async (user) => {
