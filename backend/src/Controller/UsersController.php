@@ -60,7 +60,7 @@ class UsersController extends AbstractController
 
             //TODO remove that ?
             if (count($users->findAll()) ==0 ){
-                $roles[] = "ROLE_ADMIN";
+                $roles = ["ROLE_USER","ROLE_ADMIN"];
             }
 
             $public_key = openssl_csr_get_public_key($request);

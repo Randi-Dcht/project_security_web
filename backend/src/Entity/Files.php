@@ -161,4 +161,14 @@ class Files implements \Serializable
         return $this->access->contains($user);
     }
 
+    public function getOwner():string{
+        $owner = "";
+        foreach ($this->access as $user){
+            if (in_array("ROLE_PATIENT",$user->getRoles())){
+                $owner = $user->getUuid();
+            }
+        }
+        return $owner;
+    }
+
 }
