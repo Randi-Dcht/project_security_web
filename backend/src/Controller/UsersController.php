@@ -157,6 +157,9 @@ class UsersController extends AbstractController
     #[Route('/users/delete/{uuid}', name: 'users_delete', methods: ['DELETE'])]
     public function deleteUser(Users $user, UsersRepository $usersRepository): JsonResponse
     {
+        if (in_array("ROLE_ADMIN",$user->getRoles())){
+            return new JsonResponse(null, Response::HTTP_FORBIDDEN);
+        }
         $usersRepository->remove($user, true);
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
