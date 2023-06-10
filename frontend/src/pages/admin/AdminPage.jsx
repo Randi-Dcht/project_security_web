@@ -63,6 +63,7 @@ const AdminPage = () => {
             credentials: 'include'
         });
     console.log(`Supprimer le rôle de docteur à ${user.name}`);
+    window.location.reload();
   };
 
   const handleGiveDoctorRole = async (user) => {
@@ -72,6 +73,7 @@ const AdminPage = () => {
             credentials: 'include'
         });
     console.log(`Donner le rôle de docteur à ${user.name}`);
+    window.location.reload();
   };
 
   const handleDeleteUser = async (user) => {
