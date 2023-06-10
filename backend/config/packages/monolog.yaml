@@ -2,8 +2,9 @@ monolog:
     handlers:
         forged:
             type: stream
-            path: '%kernel.logs_dir%/file_of_log.log'
+            path: '%kernel.logs_dir%/forged.log'
             level: error
+            channels: ['forged_channel']
         main:
             type: fingers_crossed
             action_level: error
