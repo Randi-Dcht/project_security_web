@@ -3,6 +3,8 @@ import '../../styles/DoctorPage.css';
 
 const AdminPage = () => {
   const [users, setUsers] = useState([]);
+  const [admins, setAdmins] = useState([]);
+  const [doctors, setDoctors] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -13,18 +15,37 @@ const AdminPage = () => {
         });
         
         const data = await response.json();
-
+  
+        console.log(data);
+  
         if (data) {
-          setUsers(data);
+          let tempUsers = [];
+          let tempAdmins = [];
+          let tempDoctors = [];
+  
+          for (let i = 0; i < data.length; i++) {
+            if (data[i].roles.includes('ROLE_PATIENT')) {
+              tempUsers.push(data[i]);
+            } else if (data[i].roles.includes('ROLE_ADMIN')) {
+              tempAdmins.push(data[i]);
+            } else if (data[i].roles.includes('ROLE_DOCTOR')) {
+              tempDoctors.push(data[i]);
+            }
+          }
+  
+          setUsers(tempUsers);
+          setAdmins(tempAdmins);
+          setDoctors(tempDoctors);
         }
-
+  
       } catch (error) {
         console.error('Erreur lors de la requête HTTPS:', error);
       }
     };
-
+  
     fetchData();
   }, []);
+  
 
   const handleSecurityUpdate = () => {
     // TODO : logique pour modifier les informations lié à la sécurité de l'utilisateur
@@ -49,9 +70,25 @@ const AdminPage = () => {
       <h1>Page de l'Admin</h1>
       <button className="red_btn" onClick={handleSecurityUpdate}>Modifier la sécurité</button>
       <section>
-        <h2>Tous les utilisateurs</h2>
+        <h2>Tous les patients</h2>
         <ul>
           {users.map((user, index) => (
+            <li key={user.uuid}>
+              {user.name} <button onClick={() => handleDeleteUser(user)}>Supprimer</button>
+            </li>
+          ))}
+        </ul>
+        <h2>Tous les admins</h2>
+        <ul>
+          {admins.map((user, index) => (
+            <li key={user.uuid}>
+              {user.name} <button onClick={() => handleDeleteUser(user)}>Supprimer</button>
+            </li>
+          ))}
+        </ul>
+        <h2>Tous les docteurs</h2>
+        <ul>
+          {doctors.map((user, index) => (
             <li key={user.uuid}>
               {user.name} <button onClick={() => handleDeleteUser(user)}>Supprimer</button>
             </li>
