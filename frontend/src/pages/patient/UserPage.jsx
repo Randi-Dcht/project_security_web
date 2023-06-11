@@ -186,7 +186,7 @@ const UserPage = () => {
 
       const a = document.createElement("a");
       const url = window.URL.createObjectURL(fileDec);
-      const filename = file.name.substr(0, file.name.length - 4) + ".pdf";
+      const filename = cryptFile.name.substr(0, cryptFile.name.length - 4) + ".pdf";
       a.href = url;
       a.download = filename;
       a.click();
