@@ -6,3 +6,9 @@ RUN echo "upstream php-upstream { server php:9000; }" > /etc/nginx/conf.d/upstre
 
 #EXPOSE 80
 EXPOSE 443
+
+RUN apk add inotify-tools
+
+COPY ./nginxReloader.sh /usr/local/bin/nginxReloader.sh
+
+RUN chmod +x /usr/local/bin/nginxReloader.sh
