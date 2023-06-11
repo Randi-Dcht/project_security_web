@@ -101,7 +101,7 @@ class Users implements UserInterface, \Serializable
      */
     public function getUserIdentifier(): string
     {
-        return (string) $this->uuid;
+        return (string)$this->uuid;
     }
 
     /**
@@ -183,6 +183,16 @@ class Users implements UserInterface, \Serializable
      */
     public function getFiles(): Collection
     {
+        if (in_array("ROLE_DOCTOR", $this->getRoles())) {
+            $ret = new ArrayCollection();
+
+            foreach ($this->getPatient() as $patient) {
+                foreach ($patient->getFiles() as $file) {
+                    $ret->add($file);
+                }
+            }
+            return $ret;
+        }
         return $this->files;
     }
 
@@ -190,11 +200,12 @@ class Users implements UserInterface, \Serializable
     {
         $names = [];
         foreach ($this->files as &$file) {
-           $names[] =$file;
-       }
+            $names[] = $file;
+        }
 
-            return $names;
+        return $names;
     }
+
     public function serialize(): ?string
     {
         return serialize(array(
@@ -219,19 +230,21 @@ class Users implements UserInterface, \Serializable
 
     public function addDoctor(Users $doctor): self
     {
-       $doctor->addPatient($this);
-       return $this;
+        $doctor->addPatient($this);
+
+        return $this;
     }
 
     public function removeDoctor(Users $doctor): self
     {
         $doctor->removePatient($this);
+
         return $this;
     }
 
     public function addPatient(Users $patient): self
     {
-        if (!$this->patient->contains($patient) ) {
+        if (!$this->patient->contains($patient)) {
             $this->patient->add($patient);
         }
 
@@ -326,8 +339,6 @@ class Users implements UserInterface, \Serializable
 
         return $this;
     }
-
-
 
 
 }

@@ -5,6 +5,30 @@ const Home = () =>
 {
     const navigate = useNavigate();
 
+    const connect = async function () {
+        try {
+            const response = await fetch('https://localhost:1026/me', {
+                method: 'GET',
+                credentials: 'include'
+            });
+
+            const data = await response.json();
+
+            if (! data.roles.includes("ROLE_USER")){
+                navigate("/error");
+            } else if (data.roles.includes("ROLE_ADMIN")) {
+                navigate("/admin");
+            } else if (data.roles.includes("ROLE_DOCTOR")) {
+                navigate("/doctor");
+            } else if (data.roles.includes("ROLE_PATIENT")) {
+                navigate("/patient");
+            }
+
+        } catch (error) {
+            console.error('Erreur lors de la requête HTTPS:', error);
+            navigate("/error");
+        }
+    }
 
     return(
         <Container>
@@ -17,7 +41,7 @@ const Home = () =>
                         
                     </Card.Text>
                     <Stack gap={2} className="col-md-5 mx-auto p-5">
-                        <Button onClick={() => navigate("/connexion")} variant="outline-secondary">Connexion</Button>
+                        <Button onClick={connect} variant="outline-secondary">Connexion</Button>
                     </Stack>
                 </Card.Body>
 

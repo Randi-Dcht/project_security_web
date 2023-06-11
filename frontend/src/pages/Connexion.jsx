@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {useNavigate} from "react-router-dom";
 import forge from 'node-forge';
 
@@ -11,14 +11,22 @@ const Connexion = () => {
 
     const handleConnexionClick = async () => {
 
-
-        //const {publicKey, privateKey} = forge.pki.rsa.generateKeyPair(2048);
-
         const response = await fetch('https://localhost:1026/me', {
             method: 'GET',
             credentials: 'include'
 
-        });
+        }).catch(()=>   navigate("/error"));
+
+
+        if (response.ok ) {
+            const resp = await response.json();
+
+
+        } else {
+            navigate("/error");
+        }
+
+
 
         console.log(response)
 

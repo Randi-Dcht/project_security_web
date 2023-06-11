@@ -1,8 +1,10 @@
 import React, {useEffect, useState } from "react";
 import CryptoJS from 'crypto-js';
-import '../../styles/UserPage.css'; // un fichier CSS pour styliser notre composant
+import '../../styles/PatientPage.css'; // un fichier CSS pour styliser notre composant
+import {useNavigate} from "react-router-dom";
 
-const UserPage = () => {
+const PatientPage = () => {
+  const navigate = useNavigate();
   const [doctors, setDoctors] = useState([]);
   const [records, setRecords] = useState([]);
   const [file, setFile] = useState(null);
@@ -18,7 +20,7 @@ const UserPage = () => {
         });
         
         const data = await response.json();
-  
+
         console.log(data);
   
         if (data) {
@@ -27,7 +29,7 @@ const UserPage = () => {
   
       } catch (error) {
         console.error('Erreur lors de la requête HTTPS:', error);
-        window.location.href = '/error';
+         navigate("/error");
       }
     };
   
@@ -37,7 +39,7 @@ const UserPage = () => {
   useEffect(() => {
     const fetchDataFolders = async () => {
       try {
-        const response = await fetch('TODO : URL get folders', {
+        const response = await fetch('https://localhost:1026/files/', {
             method: 'GET',
             credentials: 'include'
         });
@@ -52,7 +54,7 @@ const UserPage = () => {
 
       } catch (error) {
         console.error('Erreur lors de la requête HTTPS:', error);
-        window.location.href = '/error';
+         navigate("/error");
       }
     };
     fetchDataFolders();
@@ -107,12 +109,12 @@ const UserPage = () => {
     return decryptedText;
   }
 
-  const handleUserUpdate = () => {
-    
+  const handlePatientUpdate = () => {
+    navigate("/changeInfo")
   };
   const handleDoctorAdd = async () => {
     const doctorToAdd = prompt("Entrez l'adresse mail du médecin à ajouter :");
-    mailRegex = new RegExp("^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$");
+    const mailRegex = new RegExp("^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$");
     if (!mailRegex.test(doctorToAdd)) {
       alert("L'adresse mail entrée n'est pas valide.");
       return;
@@ -123,8 +125,8 @@ const UserPage = () => {
         });
   };
 
-  const handleDoctorDelete = async (user) => {
-    const response = await fetch('https://localhost:1026/patient/removeDoctor/' + user.uuid, {
+  const handleDoctorDelete = async (patient) => {
+    const response = await fetch('https://localhost:1026/patient/removeDoctor/' + patient.uuid, {
             method: 'POST',
             credentials: 'include'
         });
@@ -221,11 +223,11 @@ const UserPage = () => {
   }
 
   return (
-    <div className="user-page">
+    <div className="patient-page">
       <section>
         <h2>Mes informations</h2>
         <br />
-        <button onClick={handleUserUpdate}>Modifier mes informations</button>
+        <button onClick={handlePatientUpdate}>Modifier mes informations</button>
       </section>
       <section>
         <h2>Médecins</h2>
@@ -270,4 +272,4 @@ const UserPage = () => {
   );
 };
 
-export default UserPage;
+export default PatientPage;

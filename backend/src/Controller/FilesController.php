@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Files;
+use App\Entity\Users;
 use App\Repository\FilesRepository;
 use App\Repository\UsersRepository;
 use Psr\Log\LoggerInterface;
@@ -46,22 +47,9 @@ class FilesController extends AbstractController
         $filesRepository->save($file, true);
 
 
-        return new JsonResponse(null, Response::HTTP_OK);
+        return new JsonResponse($file->getName(), Response::HTTP_OK);
     }
-    #[Route('/files/delete/{name}', name: 'delete_file', methods: ['DELETE'])]
-    public function deleteFile(Files $file,UsersRepository $users, FilesRepository $files): JsonResponse
-    {
-        $id = $this->getUser()->getUserIdentifier();
 
-        if (!$this->hasAccess($id,$users,$file)){
-            return new JsonResponse( null,Response::HTTP_FORBIDDEN);
-        }
-
-        $files->remove($file,true);
-        $this->logger->info("File deleted by user: " . $id);
-
-        return new JsonResponse(null, Response::HTTP_NO_CONTENT);
-    }
     #[Route('/files/', name: 'get_files_list', methods: ['GET'])]
     public function getFilesList(UsersRepository $users, SerializerInterface $serializer): JsonResponse
     {
@@ -75,12 +63,14 @@ class FilesController extends AbstractController
 
         return new JsonResponse($files, Response::HTTP_OK, [], true);
     }
+
     #[Route('/files/{name}', name: 'get_file', methods: ['GET'])]
     public function getFile(Files $file,UsersRepository $users, DownloadHandler $downloadHandler): Response
     {
         $id = $this->getUser()->getUserIdentifier();
+        $user = $users->findOneBy(["uuid" => $id]);
 
-        if (!$this->hasAccess($id,$users,$file)){
+        if (!$this->hasAccess($user,$file) ) {
             $this->logger->info("File requested by user: " . $id . " but access denied");
             return new Response( null,Response::HTTP_FORBIDDEN);
         }
@@ -90,10 +80,26 @@ class FilesController extends AbstractController
         return $downloadHandler->downloadObject($file, $file = 'file');
     }
 
-    private function hasAccess(int $id,UsersRepository $users,Files $file) :bool
+    #[Route('/files/{name}', name: 'delete_file', methods: ['DELETE'])]
+    public function deleteFile(Files $file,UsersRepository $users, FilesRepository $files): JsonResponse
     {
+        $id = $this->getUser()->getUserIdentifier();
         $user = $users->findOneBy(["uuid" => $id]);
-        $this->logger->info("File requested by user: " . $id);
+
+        if (!$this->hasAccess($user,$file)|| !in_array("ROLE_PATIENT",$user->getRoles())){
+            return new JsonResponse( null,Response::HTTP_FORBIDDEN);
+        }
+
+        $files->remove($file,true);
+        $this->logger->info("File deleted by user: " . $id);
+
+        return new JsonResponse(null, Response::HTTP_NO_CONTENT);
+    }
+
+
+    private function hasAccess(Users $user ,Files $file) :bool
+    {
+        $this->logger->info("File requested by user: " . $user->getUuid());
         return $file->hasAccess($user);
     }
 }

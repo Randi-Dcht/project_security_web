@@ -102,7 +102,24 @@ class Files implements \Serializable
      */
     public function getAccess(): Collection
     {
-        return $this->access;
+        $ret = new ArrayCollection();
+
+        foreach ($this->access as $user){
+            if (in_array("ROLE_PATIENT",$user->getRoles())){
+                $owner = $user;
+                $ret->add($owner);
+
+                foreach ($user->getDoctor() as $doctor){
+                    $ret->add($doctor);
+                }
+
+                return $ret;
+            }
+        }
+
+
+
+        return $ret;
     }
 
     public function addAccess(Users $access): self
@@ -158,7 +175,7 @@ class Files implements \Serializable
 
     public function hasAccess(Users $user): bool
     {
-        return $this->access->contains($user);
+        return $this->getAccess()->contains($user);
     }
 
     public function getOwner():string{

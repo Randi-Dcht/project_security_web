@@ -114,8 +114,8 @@ class UsersController extends AbstractController
         return $user;
     }
 
-    #[Route('/revoke', name: 'revoke_cert', methods: ['POST'])]
-    public function revokeCert(UsersRepository $users, Request $request): JsonResponse
+    #[Route('/users/revoke/{uuid}', name: 'revoke_cert', methods: ['POST'])]
+    public function revokeCert(Users $user): JsonResponse
     {
         $path = $this->getParameter('kernel.project_dir');
 
@@ -147,7 +147,7 @@ class UsersController extends AbstractController
         }
 
         // Update the revocation list.
-        $crl->setRevokedCertificateExtension('233751', 'id-ce-cRLReasons', 'privilegeWithdrawn');
+        $crl->setRevokedCertificateExtension($user->getUserIdentifier(), 'id-ce-cRLReasons', 'privilegeWithdrawn');
 
         // Generate the new CRL.
         $crl->setEndDate('+3 months');
@@ -155,7 +155,7 @@ class UsersController extends AbstractController
 
         // Output it.
         //print_r($crl->saveCRL($newcrl));
-        file_put_contents($crl_path, $newcrl);
+        file_put_contents($crl_path, $crl->saveCRL($newcrl));
 
         $this->logger->info("Revoked certificat by : " . $this->getUser()->getUserIdentifier() . " at : " . time() . "");
 
@@ -265,8 +265,8 @@ class UsersController extends AbstractController
     {
         $id = $this->getUser()->getUserIdentifier();
         $user = $users->findOneBy(["uuid" => $id]);
-        $user = $serializer->serialize($user, 'json');
         $this->logger->info("User : " . $user->getName() . " with email : " . $user->getEmail() . " requested his data");
+        $user = $serializer->serialize($user, 'json');
         return new JsonResponse($user, Response::HTTP_OK,[], true);
 
     }

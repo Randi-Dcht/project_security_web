@@ -55,6 +55,10 @@ class Requests
     {
         return $this->origin;
     }
+    public function getOriginName(): ?string
+    {
+        return $this->origin->getName();
+    }
 
     public function setOrigin(?Users $origin): self
     {
