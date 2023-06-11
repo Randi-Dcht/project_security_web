@@ -1,12 +1,64 @@
-import React, { useState } from "react";
+import React, {useEffect, useState } from "react";
 import CryptoJS from 'crypto-js';
 import '../../styles/UserPage.css'; // un fichier CSS pour styliser notre composant
 
 const UserPage = () => {
-  const [doctors, setDoctors] = useState(["Dr. Smith", "Dr. Johnson"]);
-  const [records, setRecords] = useState(["Record 1", "Record 2"]);
+  const [doctors, setDoctors] = useState([]);
+  const [records, setRecords] = useState([]);
   const [file, setFile] = useState(null);
   const [cryptFile, setCryptFile] = useState(null);
+  const [folders, setFolders] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch('https://localhost:1026/patient/doctorList', {
+            method: 'GET',
+            credentials: 'include'
+        });
+        
+        const data = await response.json();
+  
+        console.log(data);
+  
+        if (data) {
+          setDoctors(data);
+        }
+  
+      } catch (error) {
+        console.error('Erreur lors de la requête HTTPS:', error);
+        window.location.href = '/error';
+      }
+    };
+  
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchDataFolders = async () => {
+      try {
+        const response = await fetch('TODO : URL get folders', {
+            method: 'GET',
+            credentials: 'include'
+        });
+        
+        const data = await response.json();
+
+        console.log(data);
+
+        if (data) {
+          setFolders(data);
+        }
+
+      } catch (error) {
+        console.error('Erreur lors de la requête HTTPS:', error);
+        window.location.href = '/error';
+      }
+    };
+    fetchDataFolders();
+  }, []);
+
+  
 
   function CryptJsWordArrayToUint8Array(wordArray) {
     const l = wordArray.sigBytes;
@@ -56,17 +108,26 @@ const UserPage = () => {
   }
 
   const handleUserUpdate = () => {
-    // TODO : logique pour modifier les informations de l'utilisateur
+    
   };
-  const handleSecurityUpdate = () => {
-      // TODO : logique pour modifier les informations lié à la sécurité de l'utilisateur
-  };
-  const handleDoctorAdd = () => {
-    // TODO : logique pour ajouter un médecin
+  const handleDoctorAdd = async () => {
+    const doctorToAdd = prompt("Entrez l'adresse mail du médecin à ajouter :");
+    mailRegex = new RegExp("^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$");
+    if (!mailRegex.test(doctorToAdd)) {
+      alert("L'adresse mail entrée n'est pas valide.");
+      return;
+    }
+    const response = await fetch('https://localhost:1026/patient/addDoctor/' + doctorToAdd, {
+            method: 'POST',
+            credentials: 'include'
+        });
   };
 
-  const handleDoctorDelete = () => {
-    // TODO : logique pour supprimer un médecin
+  const handleDoctorDelete = async (user) => {
+    const response = await fetch('https://localhost:1026/patient/removeDoctor/' + user.uuid, {
+            method: 'POST',
+            credentials: 'include'
+        });
   };
 
   const handleRecordAccess = () => {
@@ -141,15 +202,14 @@ const UserPage = () => {
         <h2>Mes informations</h2>
         <br />
         <button onClick={handleUserUpdate}>Modifier mes informations</button>
-        <button className="red_btn" onClick={handleSecurityUpdate}>Modifier la sécurité</button>
       </section>
       <section>
         <h2>Médecins</h2>
         <ul>
           {doctors.map((doctor, index) => (
             <li key={index}>
-              {doctor}
-              <button onClick={handleDoctorDelete}>Supprimer</button>
+              {doctor.name}
+              <button onClick={() => handleDoctorDelete(doctor)}>Supprimer</button>
             </li>
           ))}
         </ul>
@@ -160,10 +220,10 @@ const UserPage = () => {
       <section>
         <h2>Dossiers</h2>
         <ul>
-          {records.map((record, index) => (
+          {folders.map((folder, index) => (
             <li key={index}>
-              {record}
-              <button onClick={handleRecordAccess}>Consulter</button>
+              {folder.name}
+              <button onClick={() => handleRecordAccess(folder)}>Consulter</button>
             </li>
           ))}
         </ul>

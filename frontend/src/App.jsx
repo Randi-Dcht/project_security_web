@@ -8,6 +8,8 @@ import Signup from "./pages/Signup.jsx";
 import UserPage from './pages/patient/UserPage.jsx';
 import DoctorPage from './pages/doctor/DoctorPage.jsx';
 import AdminPage from './pages/admin/AdminPage.jsx';
+import UserInfo from './pages/UserInfo.jsx';
+import Error from './pages/Error.jsx';
 
 function App() {
   const [count, setCount] = useState(0)
@@ -22,6 +24,8 @@ function App() {
                 <Route exact path="/admin" element={<AdminPage/>}/>
                 <Route exact path="/user" element={<UserPage/>}/>
                 <Route exact path="/doctor" element={<DoctorPage/>}/>
+                <Route exact path="/changeInfo" element={<UserInfo/>}/>
+                <Route exact path="/Error" element={<Error/>}/>
             </Routes>
         </BrowserRouter>
     </div>
