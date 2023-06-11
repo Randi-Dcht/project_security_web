@@ -58,6 +58,10 @@ class Users implements UserInterface, \Serializable
     #[ORM\Column(length: 2048)]
     private ?string $publicKey = null;
 
+    #[ORM\Column]
+    #[ignore]
+    private ?int $certNbr = 0;
+
     public function __construct()
     {
         $this->files = new ArrayCollection();
@@ -336,6 +340,25 @@ class Users implements UserInterface, \Serializable
     public function setPublicKey(string $publicKey): self
     {
         $this->publicKey = $publicKey;
+
+        return $this;
+    }
+
+    public function getCertNbr(): ?int
+    {
+        return $this->certNbr;
+    }
+
+    public function setCertNbr(int $certNbr): self
+    {
+        $this->certNbr = $certNbr;
+
+        return $this;
+    }
+
+    public function upCertNbr(): self
+    {
+        $this->certNbr += 1;
 
         return $this;
     }

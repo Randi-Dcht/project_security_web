@@ -10,6 +10,7 @@ const PatientPage = () => {
   const [file, setFile] = useState(null);
   const [cryptFile, setCryptFile] = useState(null);
   const [folders, setFolders] = useState([]);
+  const [requests, setRequests] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -21,10 +22,22 @@ const PatientPage = () => {
         
         const data = await response.json();
 
-        console.log(data);
+
   
         if (data) {
           setDoctors(data);
+        }
+
+        const response_me = await fetch('https://localhost:1026/me/', {
+          method: 'GET',
+          credentials: 'include'
+        });
+
+        const data_me = await response_me.json();
+
+        if (data_me) {
+          setFolders(data_me.filesInfo);
+          setRequests(data_me.incomingRequests)
         }
   
       } catch (error) {
@@ -35,31 +48,6 @@ const PatientPage = () => {
   
     fetchData();
   }, []);
-
-  useEffect(() => {
-    const fetchDataFolders = async () => {
-      try {
-        const response = await fetch('https://localhost:1026/files/', {
-            method: 'GET',
-            credentials: 'include'
-        });
-        
-        const data = await response.json();
-
-        console.log(data);
-
-        if (data) {
-          setFolders(data);
-        }
-
-      } catch (error) {
-        console.error('Erreur lors de la requête HTTPS:', error);
-         navigate("/error");
-      }
-    };
-    fetchDataFolders();
-  }, []);
-
   
 
   function CryptJsWordArrayToUint8Array(wordArray) {
@@ -123,17 +111,45 @@ const PatientPage = () => {
             method: 'POST',
             credentials: 'include'
         });
+    if (!response.ok){
+      alert("L'adresse mail entrée n'est pas valide.");
+      return;
+    }
+    window.location.reload();
   };
 
   const handleDoctorDelete = async (patient) => {
     const response = await fetch('https://localhost:1026/patient/removeDoctor/' + patient.uuid, {
-            method: 'POST',
+            method: 'DELETE',
             credentials: 'include'
         });
+    window.location.reload();
   };
 
-  const handleRecordAccess = () => {
+  const handleRecordAccess = (data) => {
     // TODO : logique pour accéder à un dossier
+  };
+  const handleRecordDelete = async (data) => {
+    const response = await fetch('https://localhost:1026/files/' + data.name, {
+      method: 'DELETE',
+      credentials: 'include'
+    });
+    window.location.reload();
+  }
+
+  const handleRequestAccept = async (data) => {
+    const response = await fetch('https://localhost:1026/requests/accept/' + data.id, {
+      method: 'POST',
+      credentials: 'include'
+    });
+    window.location.reload();
+  };
+  const handleRequestRefuse = async (data) => {
+    const response = await fetch('https://localhost:1026/requests/refuse/' + data.id, {
+      method: 'POST',
+      credentials: 'include'
+    });
+    window.location.reload();
   };
 
   const handleFileUpload = (event) => {
@@ -248,9 +264,23 @@ const PatientPage = () => {
         <ul>
           {folders.map((folder, index) => (
             <li key={index}>
-              {folder.name}
+              {folder.originalName}
               <button onClick={() => handleRecordAccess(folder)}>Consulter</button>
+              <button onClick={() => handleRecordDelete(folder)}>Supprimer</button>
             </li>
+          ))}
+        </ul>
+      </section>
+
+      <section>
+        <h2>Requests</h2>
+        <ul>
+          {requests.map((request, index) => (
+              <li key={index}>
+                {request.type+" venant de "+request.originName}
+                <button onClick={() => handleRequestAccept(request)}>Accepter</button>
+                <button onClick={() => handleRequestRefuse(request)}>Refuser</button>
+              </li>
           ))}
         </ul>
       </section>

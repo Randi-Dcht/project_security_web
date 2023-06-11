@@ -33,6 +33,7 @@ security:
     access_control:
         - { path: '^/register', roles: [] }
         - { path: '^/me', roles: ROLE_USER }
+        - { path: '^/changeInfo', roles: ROLE_USER }
         - { path: '^/users', roles: ROLE_ADMIN }
         - { path: '^/files', roles: ROLE_USER }
         - { path: '^/patient', roles: [ROLE_PATIENT,ROLE_ADMIN] }

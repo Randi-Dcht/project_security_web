@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import '../styles/DoctorPage.css';
 import {useNavigate} from "react-router-dom";
+import {requestCert} from "../Utils.js";
 
 const DoctorPage = () => {
     const navigate = useNavigate();
@@ -28,7 +29,7 @@ const DoctorPage = () => {
 
                 if (data) {
                     setName(data.name);
-                    setLastName(data.lastName);
+                    setLastName("");
                     setMail(data.email);
                 }
 
@@ -48,43 +49,16 @@ const DoctorPage = () => {
         setIsEditing(!isEditing);
     };
 
-    const handleSubmit = () => {
-        const nameRegex = /^[a-zA-Z\s]*$/;
+    const handleSubmit = async () => {
 
-        //verifier si le mail est vide
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-        if (!emailRegex.test(mail)) {
-            console.log('Veuillez entrer une adresse e-mail valide.');
-            return;
-        }
-
-        if (name === '') {
-            setName(oldName);
-        }
-        if (lastName === '') {
-            setLastName(oldLastName);
-        }
-        if (mail === '') {
-            setMail(oldMail);
-        }
-        if (name === '' && lastName === '' && mail === '') {
-            return;
-        }
-        if (mail !== oldMail) {
-            //TODO changer le mail et le p12
-        }
-        if (name !== oldName) {
-            //TODO changer le nom
-        }
-        if (lastName !== oldLastName) {
-            //TODO changer le prenom
-        }
+        const url = "https://localhost:1026/changeInfo";
+        await requestCert(url,mail,name,lastName,true);
         setIsEditing(false);
     };
 
-    const handleRequest = () => {
-
+    const handleRequest = async () => {
+        const url = "https://localhost:1026/changeInfo";
+        await requestCert(url,mail,name,lastName,true);
     }
 
     return (

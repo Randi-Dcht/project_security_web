@@ -29,7 +29,8 @@ class UsersController extends AbstractController
     public function registerPatient(UsersRepository $users, Request $request): Response
     {
         $this->logger->info("Registering patient");
-        return $this->registerUser($users,$request,"ROLE_PATIENT");
+
+        return $this->registerUser($users, $request, "ROLE_PATIENT");
     }
 
 
@@ -37,7 +38,8 @@ class UsersController extends AbstractController
     public function registerOther(UsersRepository $users, Request $request): Response
     {
         $this->logger->info("Registering admin");
-        return $this->registerUser($users,$request,"");
+
+        return $this->registerUser($users, $request, "");
     }
 
 
@@ -46,7 +48,7 @@ class UsersController extends AbstractController
         //TODO check all value !! (injection or bad value to logger !!!) #security
 
         $subject = openssl_csr_get_subject($request);
-        if (! array_key_exists("emailAddress",$subject) or ! array_key_exists("CN",$subject)){
+        if (!array_key_exists("emailAddress", $subject) or !array_key_exists("CN", $subject)) {
             return new JsonResponse(null, Response::HTTP_BAD_REQUEST);
         }
         $email = $subject["emailAddress"];
@@ -65,16 +67,16 @@ class UsersController extends AbstractController
 
             $roles = ["ROLE_USER"];
 
-            if ($role != ""){
+            if ($role != "") {
                 $roles[] = $role;
             }
 
             //TODO remove that ?
-            if (count($users->findAll()) ==0 ){
-                $roles = ["ROLE_USER","ROLE_ADMIN"];
+            if (count($users->findAll()) == 0) {
+                $roles = ["ROLE_USER", "ROLE_ADMIN"];
             }
 
-            $this->logger->info("Registering user : " . $name . " with email : " . $email);
+            $this->logger->info("Registering user : ".$name." with email : ".$email);
 
             $public_key = openssl_csr_get_public_key($request);
             $key_info = openssl_pkey_get_details($public_key);
@@ -83,25 +85,16 @@ class UsersController extends AbstractController
             $user = $this->addUser($info, $roles, $users);
 
             // sign the certificate request
-            $output = $this->sign_csr($request, $user->getUserIdentifier());
+            $output = $this->sign_csr($request, $user);
+
+            $users->save($user, true);
 
             return new Response($output, Response::HTTP_CREATED);
         }
     }
-
-    private function sign_csr(string $request, string $id) :string{
-        $path = $this->getParameter('kernel.project_dir');
-        $cacert = "file://" . $path . "/cert/ca.crt";
-        $privkey = "file://" . $path . "/cert/ca.key";
-        $signed = openssl_csr_sign($request, $cacert, $privkey, 365, array('digest_alg'=>'sha256'), intval($id));
-        openssl_x509_export($signed,$output);
-        $this->logger->info("Signed certificat for : " . $id);
-        return $output;
-    }
-
-    public function addUser(array $info, array $role,UsersRepository $usersRepository): Users
+    public function addUser(array $info, array $role, UsersRepository $usersRepository): Users
     {
-        $myId = date('y') . random_int(11, 999) . $usersRepository->count([]);
+        $myId = date('y').random_int(11, 999).$usersRepository->count([]);
         $user = new Users();
         $user->setEmail($info["email"]);
         $user->setName($info["name"]);
@@ -110,22 +103,89 @@ class UsersController extends AbstractController
         $user->setRoles($role);
         $user->setDateSignUp(time());
         $usersRepository->save($user, true);
-        $this->logger->info("User : " . $info["name"] . " with email : " . $info["email"] . " registered");
+        $this->logger->info("User : ".$info["name"]." with email : ".$info["email"]." registered");
+
         return $user;
     }
+    #[Route('/changeInfo', name: 'change_info', methods: ['POST'])]
+    public function change_info(UsersRepository $users, Request $request): Response
+    {
+        $id = $this->getUser()->getUserIdentifier();
+        $user = $users->findOneBy(["uuid" => $id]);
+
+        $subject = openssl_csr_get_subject($request);
+        if (!array_key_exists("emailAddress", $subject) or !array_key_exists("CN", $subject)) {
+            return new JsonResponse(null, Response::HTTP_BAD_REQUEST);
+        }
+
+        $email = $subject["emailAddress"];
+
+        $criteria = array('email' => $email);
+        $exist = $users->findBy($criteria);
+
+        if (count($exist) >= 1 && $exist[0]->getUuid() != $user->getUuid()) {
+            return new JsonResponse(null, Response::HTTP_CONFLICT);
+        }
+
+        // create the user
+        $user->setEmail($email);
+        $user->setName( $subject["CN"]);
+
+        $public_key = openssl_csr_get_public_key($request);
+        $key_info = openssl_pkey_get_details($public_key);
+        $user->setPublicKey($key_info['key']);
+
+        $this->revoke_cert($user->getUserIdentifier()*1000+$user->getCertNbr()-1);
+
+        // sign the certificate request
+        $output = $this->sign_csr($request, $user);
+
+        $users->save($user, true);
+
+        return new Response($output, Response::HTTP_CREATED);
+
+
+    }
+    private function sign_csr(string $request, Users $user): string
+    {
+        $path = $this->getParameter('kernel.project_dir');
+        $cacert = "file://".$path."/cert/ca.crt";
+        $privkey = "file://".$path."/cert/ca.key";
+        $signed = openssl_csr_sign(
+            $request,
+            $cacert,
+            $privkey,
+            365,
+            array('digest_alg' => 'sha256'),
+            intval($user->getUserIdentifier()) * 1000 + $user->getCertNbr()
+        );
+        $user->upCertNbr();
+        openssl_x509_export($signed, $output);
+        $this->logger->info("Signed certificat for : ".$user->getUserIdentifier());
+
+        return $output;
+    }
+
 
     #[Route('/users/revoke/{uuid}', name: 'revoke_cert', methods: ['POST'])]
     public function revokeCert(Users $user): JsonResponse
     {
+        $this->revoke_cert($user->getUserIdentifier()*1000+$user->getCertNbr()-1);
+
+        return new JsonResponse(null, Response::HTTP_OK);
+
+    }
+
+    private function revoke_cert(int $id){
         $path = $this->getParameter('kernel.project_dir');
 
-        $cacert = "file://" . $path . "/cert/ca.crt";
+        $cacert = "file://".$path."/cert/ca.crt";
         $cacert = file_get_contents($cacert);
 
-        $privkey = "file://" . $path . "/cert/ca.key";
+        $privkey = "file://".$path."/cert/ca.key";
         $cakey = file_get_contents($privkey);
 
-        $crl_path = "file://" . $path . "/cert/crl/crl.pem";
+        $crl_path = "file://".$path."/cert/crl/crl.pem";
         $pemcrl = file_get_contents($crl_path);
 
 
@@ -147,7 +207,7 @@ class UsersController extends AbstractController
         }
 
         // Update the revocation list.
-        $crl->setRevokedCertificateExtension($user->getUserIdentifier(), 'id-ce-cRLReasons', 'privilegeWithdrawn');
+        $crl->setRevokedCertificateExtension($id, 'id-ce-cRLReasons', 'privilegeWithdrawn');
 
         // Generate the new CRL.
         $crl->setEndDate('+3 months');
@@ -157,10 +217,7 @@ class UsersController extends AbstractController
         //print_r($crl->saveCRL($newcrl));
         file_put_contents($crl_path, $crl->saveCRL($newcrl));
 
-        $this->logger->info("Revoked certificat by : " . $this->getUser()->getUserIdentifier() . " at : " . time() . "");
-
-        return new JsonResponse(null, Response::HTTP_OK);
-
+        $this->logger->info("Revoked certificat by : ".$this->getUser()->getUserIdentifier()." at : ".time()."");
     }
 
     #[Route('/users/list', name: 'users_list', methods: ['GET'])]
@@ -168,65 +225,72 @@ class UsersController extends AbstractController
     {
         $users = $users_list->findAll();
         $userList = $serializer->serialize($users, 'json');
+
         return new JsonResponse($userList, Response::HTTP_OK, [], true);
     }
 
     #[Route('/users/delete/{uuid}', name: 'users_delete', methods: ['DELETE'])]
     public function deleteUser(Users $user, UsersRepository $usersRepository): JsonResponse
     {
-        if (in_array("ROLE_ADMIN",$user->getRoles())){
+        if (in_array("ROLE_ADMIN", $user->getRoles())) {
             return new JsonResponse(null, Response::HTTP_FORBIDDEN);
         }
         $usersRepository->remove($user, true);
-        $this->logger->info("User : " . $user->getName() . " with email : " . $user->getEmail() . " deleted");
+        $this->logger->info("User : ".$user->getName()." with email : ".$user->getEmail()." deleted");
+
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 
     #[Route('/users/makeAdmin/{uuid}', name: 'admin_create', methods: ['POST'])]
     public function makeAdmin(Users $user, UsersRepository $usersRepository): JsonResponse
     {
-        if (!in_array("ROLE_ADMIN", $user->getRoles())){
+        if (!in_array("ROLE_ADMIN", $user->getRoles())) {
             $user->addRole("ROLE_ADMIN");
-            $usersRepository->save($user,true);
+            $usersRepository->save($user, true);
         }
+
         return new JsonResponse(null, Response::HTTP_OK);
     }
 
     #[Route('/users/makeDoctor/{uuid}', name: 'doctor_create', methods: ['POST'])]
     public function makeDoctor(Users $user, UsersRepository $usersRepository): JsonResponse
     {
-        if (!in_array("ROLE_DOCTOR", $user->getRoles())){
+        if (!in_array("ROLE_DOCTOR", $user->getRoles())) {
             $user->removeRole("ROLE_PATIENT");
             $user->addRole("ROLE_DOCTOR");
-            $usersRepository->save($user,true);
-            $this->logger->info("User : " . $user->getName() . " with email : " . $user->getEmail() . " is now a doctor");
+            $usersRepository->save($user, true);
+            $this->logger->info("User : ".$user->getName()." with email : ".$user->getEmail()." is now a doctor");
         }
+
         return new JsonResponse(null, Response::HTTP_OK);
     }
 
     #[Route('/users/unmakeDoctor/{uuid}', name: 'doctor_unmake', methods: ['DELETE'])]
     public function unmakeDoctor(Users $user, UsersRepository $usersRepository): JsonResponse
     {
-        if (in_array("ROLE_DOCTOR", $user->getRoles())){
+        if (in_array("ROLE_DOCTOR", $user->getRoles())) {
             $user->removeRole("ROLE_DOCTOR");
-            $usersRepository->save($user,true);
-            $this->logger->info("User : " . $user->getName() . " with email : " . $user->getEmail() . " is no a doctor");
+            $usersRepository->save($user, true);
+            $this->logger->info("User : ".$user->getName()." with email : ".$user->getEmail()." is no a doctor");
         }
+
         return new JsonResponse(null, Response::HTTP_OK);
     }
 
-    #[Route('/patient/addDoctor/{uuid}', name: 'doctor_add', methods: ['POST'])]
+    #[Route('/patient/addDoctor/{email}', name: 'doctor_add', methods: ['POST'])]
     public function addDoctor(Users $doctor, UsersRepository $users): JsonResponse
     {
-        if (in_array("ROLE_DOCTOR", $doctor->getRoles())){
+        if (in_array("ROLE_DOCTOR", $doctor->getRoles())) {
             $id = $this->getUser()->getUserIdentifier();
             $user = $users->findOneBy(["uuid" => $id]);
             $doctor->addPatient($user);
-            $users->save($doctor,true);
-            $this->logger->info("User : " . $user->getName() . " added to doctor : " . $doctor->getName() . "");
+            $users->save($doctor, true);
+            $this->logger->info("User : ".$user->getName()." added to doctor : ".$doctor->getName()."");
+
             return new JsonResponse(null, Response::HTTP_OK);
-        }else{
-            $this->logger->info("User tried to add to doctor : " . $doctor->getName() . " but failed");
+        } else {
+            $this->logger->info("User tried to add to doctor : ".$doctor->getName()." but failed");
+
             return new JsonResponse(null, Response::HTTP_BAD_REQUEST);
         }
 
@@ -235,14 +299,15 @@ class UsersController extends AbstractController
     #[Route('/patient/removeDoctor/{uuid}', name: 'doctor_remove', methods: ['DELETE'])]
     public function removeDoctor(Users $doctor, UsersRepository $users): JsonResponse
     {
-        if (in_array("ROLE_DOCTOR", $doctor->getRoles())){
+        if (in_array("ROLE_DOCTOR", $doctor->getRoles())) {
             $id = $this->getUser()->getUserIdentifier();
             $user = $users->findOneBy(["uuid" => $id]);
             $doctor->removePatient($user);
-            $users->save($doctor,true);
-            $this->logger->info("User : " . $user->getName() . " removed from doctor : " . $doctor->getName() . "");
+            $users->save($doctor, true);
+            $this->logger->info("User : ".$user->getName()." removed from doctor : ".$doctor->getName()."");
+
             return new JsonResponse(null, Response::HTTP_OK);
-        }else{
+        } else {
             return new JsonResponse(null, Response::HTTP_BAD_REQUEST);
         }
     }
@@ -250,11 +315,12 @@ class UsersController extends AbstractController
     #[Route('/patient/doctorPublic/{uuid}', name: 'doctor_public', methods: ['GET'])]
     public function doctor_public(Users $doctor, UsersRepository $users): Response
     {
-        if (in_array("ROLE_DOCTOR", $doctor->getRoles())){
+        if (in_array("ROLE_DOCTOR", $doctor->getRoles())) {
             $key = $doctor->getPublicKey();
-            $this->logger->info("User : " . $doctor->getName() . " public key requested");
+            $this->logger->info("User : ".$doctor->getName()." public key requested");
+
             return new Response($key, Response::HTTP_OK);
-        }else{
+        } else {
             return new Response(null, Response::HTTP_BAD_REQUEST);
         }
 
@@ -265,9 +331,10 @@ class UsersController extends AbstractController
     {
         $id = $this->getUser()->getUserIdentifier();
         $user = $users->findOneBy(["uuid" => $id]);
-        $this->logger->info("User : " . $user->getName() . " with email : " . $user->getEmail() . " requested his data");
+        $this->logger->info("User : ".$user->getName()." with email : ".$user->getEmail()." requested his data");
         $user = $serializer->serialize($user, 'json');
-        return new JsonResponse($user, Response::HTTP_OK,[], true);
+
+        return new JsonResponse($user, Response::HTTP_OK, [], true);
 
     }
 
@@ -278,12 +345,14 @@ class UsersController extends AbstractController
         $user = $users->findOneBy(["uuid" => $id]);
         $patient = $user->getDoctor()->map(function (Users $user) {
             return ["uuid" => $user->getUserIdentifier(), "name" => $user->getName()];
-        } );
+        });
         $patient = $serializer->serialize($patient, 'json');
-        $this->logger->info("User : " . $user->getName() . " with email : " . $user->getEmail() . " requested his doctor list");
-        return new JsonResponse($patient, Response::HTTP_OK,[], true);
+        $this->logger->info("User : ".$user->getName()." with email : ".$user->getEmail()." requested his doctor list");
+
+        return new JsonResponse($patient, Response::HTTP_OK, [], true);
 
     }
+
     #[Route('/doctor/patientsList', name: 'doctor_patient', methods: ['GET'])]
     public function doctor_patient(UsersRepository $users, SerializerInterface $serializer): JsonResponse
     {
@@ -291,10 +360,13 @@ class UsersController extends AbstractController
         $user = $users->findOneBy(["uuid" => $id]);
         $patient = $user->getPatient()->map(function (Users $user) {
             return ["uuid" => $user->getUserIdentifier(), "name" => $user->getName()];
-        } );
+        });
         $patient = $serializer->serialize($patient, 'json');
-        $this->logger->info("User : " . $user->getName() . " with email : " . $user->getEmail() . " requested his patient list");
-        return new JsonResponse($patient, Response::HTTP_OK,[], true);
+        $this->logger->info(
+            "User : ".$user->getName()." with email : ".$user->getEmail()." requested his patient list"
+        );
+
+        return new JsonResponse($patient, Response::HTTP_OK, [], true);
 
     }
 

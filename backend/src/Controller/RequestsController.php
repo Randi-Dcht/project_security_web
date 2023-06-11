@@ -93,6 +93,21 @@ class RequestsController extends AbstractController
         return new JsonResponse(null, Response::HTTP_BAD_REQUEST);
     }
 
+    #[Route('/requests/refuse/{id}', name: 'refuse_request', methods: ["POST"])]
+    public function request_refuse(Requests $request, UsersRepository $users, RequestsRepository $requests): JsonResponse
+    {
+        $id = $this->getUser()->getUserIdentifier();
+        $user = $users->findOneBy(["uuid" => $id]);
+
+        if ($user->getIncomingRequests()->contains($request)){
+            $requests->remove($request,true);
+            $this->logger->info("Request refused by: " . $user->getUuid());
+            return new JsonResponse(null, Response::HTTP_OK);
+        }
+        $this->logger->error("Request failed to refuse by: " . $user->getUuid());
+        return new JsonResponse(null, Response::HTTP_BAD_REQUEST);
+    }
+
     #[Route('/requests/sendKey/{uuid}', name: 'send_key', methods: ["POST"])]
     public function send_key(Users $doctor, UsersRepository $users, RequestsRepository $requests, Request $key): JsonResponse
     {
