@@ -5,6 +5,8 @@ import {all} from "axios";
 import {encode64} from "node-forge/lib/util.js";
 import forge from "node-forge";
 import CryptoJS from "crypto-js";
+import {CryptJsWordArrayToUint8Array} from "../../Utils.js";
+import cryptFile from "node-forge/lib/cipherModes.js";
 
 
 const DoctorPage = () => {
@@ -13,7 +15,7 @@ const DoctorPage = () => {
     const [selectedFile, setSelectedFile] = useState(null);
     const [allFile, setAllFile] = useState(null);
     const [folders, setFolders] = useState([]);
-
+    const [privateKey, setPrivateKey] = useState(null);
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -27,6 +29,28 @@ const DoctorPage = () => {
                 if (data) {
                     setPatients(data);
                 }
+
+                const response_me = await fetch('https://localhost:1026/me/', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+
+                const data_me = await response_me.json();
+
+                console.log(data_me);
+
+                if (data_me) {
+                    if (data_me.incomingRequests) {
+                        for (let request of data_me.incomingRequests) {
+                            localStorage.setItem("key" + request.originUuid, request.symKey)
+                            await fetch('https://localhost:1026/requests/accept/' + request.id, {
+                                method: 'POST',
+                                credentials: 'include'
+                            })
+                        }
+                    }
+                }
+
 
                 const response_file = await fetch('https://localhost:1026/files/', {
                     method: 'GET',
@@ -70,27 +94,37 @@ const DoctorPage = () => {
     };
 
     const handleRecordAccess = async (folder) => {
+        let key = localStorage.getItem("key"+folder.owner);
+        if (!key || !privateKey) {
+            console.log(privateKey)
+            return;
+        } else {
+            key = privateKey.decrypt(key, 'RSA-OAEP');
+        }
+
         const response = await fetch('https://localhost:1026/files/' + folder.name, {
             method: 'GET',
             credentials: 'include'
         });
 
-        const data =  await response.text();
+        const data = await response.text();
 
-        // create download link
-        const link = document.createElement('a');
-        const test = 'data:application/pdf;base64,' +  encode64(data) ;
+        const decrypted = CryptoJS.AES.decrypt(data, key);               // Decryption: I: Base64 encoded string (OpenSSL-format) -> O: WordArray
+        const typedArray = CryptJsWordArrayToUint8Array(decrypted);               // Convert: WordArray -> typed array
 
-        link.setAttribute('href', test);
-        link.setAttribute("download", "a.pdf");
+        const fileDec = new Blob([typedArray]);                                   // Create blob from typed array
 
-        // Append to html link element page
-        document.body.appendChild(link);
-        // Start download
-        link.click();
-        // Clean up and remove the link
-        link.parentNode.removeChild(link);
+        const a = document.createElement("a");
+        const url = window.URL.createObjectURL(fileDec);
+        //const filename = cryptFile.name.substr(0, cryptFile.name.length - 4) + ".pdf";
+        a.href = url;
+        a.download = "ad.pdf";
+        a.click();
+        window.URL.revokeObjectURL(url);
+
     };
+
+
 
     const handleFolderList = (user) => {
         const filtered = allFile.filter((file) => file.owner === user.uuid);
@@ -140,8 +174,27 @@ const DoctorPage = () => {
 
         reader.readAsBinaryString(document.getElementById('file').files[0]);
     };
+    const handleKeyChange = () => {
+        const reader = new FileReader();
+        reader.onload = () => {
+
+            const p12b64 = btoa(reader.result)
+            // decode p12 from base64
+            const p12Der = forge.util.decode64(p12b64);
+            // get p12 as ASN.1 object
+            const p12Asn1 = forge.asn1.fromDer(p12Der);
+
+            // decrypt p12 using an "empty" password (eg: OpenSSL with no password input)
+            const p12 = forge.pkcs12.pkcs12FromAsn1(p12Asn1, true, '');
+
+            const keyBags = p12.getBags({bagType: forge.pki.oids.pkcs8ShroudedKeyBag});
+            const bag = keyBags[forge.pki.oids.pkcs8ShroudedKeyBag][0];
+            setPrivateKey(bag.key);
 
 
+        };
+        reader.readAsBinaryString(document.getElementById('file_p12').files[0]);
+    }
 
     return (
         <div className="doctor-page">
@@ -158,8 +211,8 @@ const DoctorPage = () => {
                     {patients.map((patient, index) => (
                         <li key={index}>
                             {patient.name}
-                            <button onClick={()=> handleFolderList(patient)}>Voir le dossier médical</button>
-                            <button onClick={()=>handlePatientDelete(patient)}>Supprimer</button>
+                            <button onClick={() => handleFolderList(patient)}>Voir le dossier médical</button>
+                            <button onClick={() => handlePatientDelete(patient)}>Supprimer</button>
                         </li>
                     ))}
                 </ul>
@@ -176,6 +229,11 @@ const DoctorPage = () => {
                         </li>
                     ))}
                 </ul>
+            </section>
+            <section>
+                <h2>private Key</h2>
+                <input id={"file_p12"} type="file" onChange={handleKeyChange}/>
+
             </section>
             <section>
                 <h2>Ajouter un fichier à un dossier médical</h2>

@@ -3,7 +3,6 @@ import reactLogo from './assets/react.svg'
 import './styles/App.css'
 import {BrowserRouter, Route, Routes} from "react-router-dom";
 import Home from './pages/Home';
-import Connexion from "./pages/Connexion.jsx";
 import Signup from "./pages/Signup.jsx";
 import PatientPage from './pages/patient/PatientPage.jsx';
 import DoctorPage from './pages/doctor/DoctorPage.jsx';
@@ -19,7 +18,6 @@ function App() {
             <BrowserRouter>
                 <Routes>
                     <Route exact path="/" element={<Home/>}/>
-                    <Route exact path="/connexion" element={<Connexion/>}/>
                     <Route exact path="/signup" element={<Signup/>}/>
                     <Route exact path="/admin" element={<AdminPage/>}/>
                     <Route exact path="/patient" element={<PatientPage/>}/>

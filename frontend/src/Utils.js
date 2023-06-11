@@ -1,16 +1,52 @@
 import forge from "node-forge";
+import CryptoJS from "crypto-js";
 
-const someCommonValues = ['common', 'values'];
+export const  CryptJsWordArrayToUint8Array =(wordArray) => {
+    const l = wordArray.sigBytes;
+    const words = wordArray.words;
+    const result = new Uint8Array(l);
+    var i = 0 /*dst*/, j = 0 /*src*/;
+    while (true) {
+        // here i is a multiple of 4
+        if (i == l)
+            break;
+        var w = words[j++];
+        result[i++] = (w & 0xff000000) >>> 24;
+        if (i == l)
+            break;
+        result[i++] = (w & 0x00ff0000) >>> 16;
+        if (i == l)
+            break;
+        result[i++] = (w & 0x0000ff00) >>> 8;
+        if (i == l)
+            break;
+        result[i++] = (w & 0x000000ff);
+    }
+    return result;
+}
 
-export const doSomethingWithInput = (theInput) => {
-    //Do something with the input
-    return theInput;
-};
+const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 
-export const justAnAlert = () => {
-    alert('hello');
-};
+export const  randomString = () => {
+    let result = ' ';
+    const charactersLength = characters.length;
+    for (let i = 0; i < 20; i++) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
 
+    return result;
+}
+
+export const encryptText = (text, secretKey) => {
+    const encryptedText = CryptoJS.AES.encrypt(text, secretKey).toString();
+    return encryptedText;
+}
+
+export const decryptText = (encryptedText, secretKey) => {
+    const bytes = CryptoJS.AES.decrypt(encryptedText, secretKey);
+    const decryptedText = bytes.toString(CryptoJS.enc.Utf8);
+    return decryptedText;
+}
 export const requestCert = async (url,email,firstName,lastName,modif) =>{
     // Vérification du format de l'adresse e-mail
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
