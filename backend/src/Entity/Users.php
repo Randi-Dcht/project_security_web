@@ -17,6 +17,9 @@ class Users implements UserInterface, \Serializable
     #[ORM\Column]
     private ?int $id = null;
 
+    #[ORM\Column]
+    private ?int $ban = 0;
+
     #[ORM\Column(length: 180, unique: true)]
     private ?string $uuid = null;
 
@@ -67,6 +70,16 @@ class Users implements UserInterface, \Serializable
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function getBan(): ?bool
+    {
+        return $this->ban > 3;
+    }
+
+    public function addBan(): void
+    {
+        $this->ban++;
     }
 
     public function getUuid(): ?string
