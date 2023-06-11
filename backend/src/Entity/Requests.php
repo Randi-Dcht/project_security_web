@@ -59,7 +59,10 @@ class Requests
     {
         return $this->origin->getName();
     }
-
+    public function getOriginUuid(): ?string
+    {
+        return $this->origin->getUuid();
+    }
     public function setOrigin(?Users $origin): self
     {
         $this->origin = $origin;

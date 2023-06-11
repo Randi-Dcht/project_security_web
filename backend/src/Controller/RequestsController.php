@@ -77,7 +77,7 @@ class RequestsController extends AbstractController
                 $user->removeDoctor($doctor);
                 $users->save($doctor,true);
 
-            }  else if ($request->getType() == "FILE"){
+            } else if ($request->getType() == "FILE"){
 
 
             } else if ($request->getType() == "KEY"){
