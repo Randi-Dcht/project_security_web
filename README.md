@@ -21,6 +21,12 @@ due to 11/6 (submit via git)
 or a shell script to install missing dependencies, compile the project and run relevant
 scripts)
 
+## Report
+
+> The report is available using `cd report` from the root of this archive.
+> Please find there the security_project.pdf and the related type script source
+> Thanks
+
 ## How to use the project :
 
 ### Frontend :
