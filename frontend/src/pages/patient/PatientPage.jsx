@@ -48,7 +48,6 @@ const PatientPage = () => {
   
     fetchData();
   }, []);
-  
 
   function CryptJsWordArrayToUint8Array(wordArray) {
     const l = wordArray.sigBytes;
@@ -239,7 +238,7 @@ const PatientPage = () => {
   }
 
   return (
-    <div className="patient-page">
+    <div className={'patient-page'}>
       <section>
         <h2>Mes informations</h2>
         <br />

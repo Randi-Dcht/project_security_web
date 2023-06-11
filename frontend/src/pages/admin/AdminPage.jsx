@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import '../../styles/DoctorPage.css';
+import '../../styles/AdminPage.css';
 import {useNavigate} from "react-router-dom";
 
 const AdminPage = () => {
@@ -94,7 +94,7 @@ const AdminPage = () => {
     };
 
     return (
-        <div className="doctor-page">
+        <div className="admin-page">
             <h1>Page de l'Admin</h1>
             <section>
                 <h2>Utilisateurs à valider</h2>

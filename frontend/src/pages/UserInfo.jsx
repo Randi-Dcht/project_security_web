@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import '../styles/DoctorPage.css';
+import '../styles/UserInfo.css';
 import {useNavigate} from "react-router-dom";
 import {requestCert} from "../Utils.js";
 

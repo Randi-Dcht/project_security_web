@@ -1,28 +1,50 @@
-.user-page {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2rem;
-  }
-  
-  .user-page section {
-    width: 70%;
-    border: 1px solid #ccc;
-    padding: 1rem;
-    border-radius: 8px;
-  }
-  
-  .user-page h2 {
-    text-align: center;
-    color: #333;
-  }
-  
-  .user-page ul {
-    list-style-type: none;
-    padding: 0;
-  }
-  
-  .user-page button {
-    margin-left: 1rem;
-  }
-  
+.patient-page {
+  width: 80%;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: 'Arial', sans-serif;
+  color: #333;
+}
+
+.patient-page section {
+  margin-bottom: 30px;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+}
+
+.patient-page section h2 {
+  font-size: 1.2em;
+  margin-bottom: 10px;
+  color: #444;
+}
+
+.patient-page ul {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+.patient-page ul li {
+  margin-bottom: 10px;
+}
+
+.patient-page button {
+  font-size: 1em;
+  padding: 10px 20px;
+  margin-left: 10px;
+  border: none;
+  border-radius: 5px;
+  color: white;
+  background-color: #4CAF50;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.patient-page button:hover {
+  background-color: #45a049;
+}
+
+.patient-page input[type="file"] {
+  margin-top: 10px;
+}

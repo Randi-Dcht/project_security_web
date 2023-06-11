@@ -6,6 +6,7 @@ import {encode64} from "node-forge/lib/util.js";
 import forge from "node-forge";
 import CryptoJS from "crypto-js";
 
+
 const DoctorPage = () => {
     const navigate = useNavigate();
     const [patients, setPatients] = useState([]);

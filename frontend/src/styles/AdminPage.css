@@ -1,0 +1,62 @@
+.admin-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    margin: 20px;
+    padding: 20px;
+    background-color: #f1f1f1;
+    border-radius: 15px;
+    font-family: Arial, sans-serif;
+}
+
+.admin-page h1 {
+    color: #333;
+}
+
+.admin-page h2 {
+    color: #666;
+    margin-top: 20px;
+}
+
+.admin-page ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.admin-page li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.admin-page button {
+    margin-left: 10px;
+    padding: 5px 10px;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+/* Styles des boutons */
+.admin-page button:nth-child(2) {
+    background-color: #5cb85c; /* Vert pour "Donner le rôle de docteur" */
+}
+
+.admin-page button:nth-child(3) {
+    background-color: #f0ad4e; /* Orange pour "Donner le rôle administrateur" */
+}
+
+.admin-page button:nth-child(4) {
+    background-color: #d9534f; /* Rouge pour "Supprimer" */
+}
+
+.admin-page button:nth-child(5) {
+    background-color: #337ab7; /* Bleu pour "Supprimer le rôle de docteur" */
+}
