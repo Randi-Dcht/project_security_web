@@ -1,5 +1,7 @@
+import React from 'react';
 import {useNavigate} from "react-router-dom";
 import {Alert, Button, Card, Container, Image, Stack} from "react-bootstrap";
+import '../styles/Home.css'; // assurez-vous que le chemin vers votre fichier CSS est correct
 
 const Home = () =>
 {
@@ -31,27 +33,27 @@ const Home = () =>
     }
 
     return(
-        <Container>
+        <Container className="home-container">
 
-            <Card className="m-3">
-                <Card.Header>Page d'accueil</Card.Header>
-                <Card.Body>
-                    <Card.Title>Vous êtes déjà membre ?</Card.Title>
-                    <Card.Text>
+            <Card className="m-3 home-card">
+                <Card.Header className="home-card-header">Page d'accueil</Card.Header>
+                <Card.Body className="home-card-body">
+                    <Card.Title className="home-card-title">Vous êtes déjà membre ?</Card.Title>
+                    <Card.Text className="home-card-text">
                         
                     </Card.Text>
-                    <Stack gap={2} className="col-md-5 mx-auto p-5">
-                        <Button onClick={connect} variant="outline-secondary">Connexion</Button>
+                    <Stack gap={2} className="col-md-5 mx-auto p-5 home-stack">
+                        <Button onClick={connect} variant="outline-secondary" className="home-button">Connexion</Button>
                     </Stack>
                 </Card.Body>
 
-                <Card.Body>
-                    <Card.Title>Vous êtes un patient mais vous n'avez pas de compte ? Inscrivez-vous !</Card.Title>
-                    <Card.Text>
+                <Card.Body className="home-card-body">
+                    <Card.Title className="home-card-title">Vous êtes un patient mais vous n'avez pas de compte ? Inscrivez-vous !</Card.Title>
+                    <Card.Text className="home-card-text">
                         
                     </Card.Text>
-                    <Stack gap={2} className="col-md-5 mx-auto p-5">
-                        <Button onClick={() => navigate("/signup")} variant="outline-secondary">S'inscrire</Button>
+                    <Stack gap={2} className="col-md-5 mx-auto p-5 home-stack">
+                        <Button onClick={() => navigate("/signup")} variant="outline-secondary" className="home-button">S'inscrire</Button>
                     </Stack>
                 </Card.Body>
             </Card>

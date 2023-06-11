@@ -8,6 +8,7 @@ import CryptoJS from "crypto-js";
 import {CryptJsWordArrayToUint8Array} from "../../Utils.js";
 import cryptFile from "node-forge/lib/cipherModes.js";
 
+
 const DoctorPage = () => {
     const navigate = useNavigate();
     const [patients, setPatients] = useState([]);

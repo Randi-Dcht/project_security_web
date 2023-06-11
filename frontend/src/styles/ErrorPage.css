@@ -1,0 +1,40 @@
+.error-page {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f2f2f2;
+    color: #333;
+    font-family: 'Roboto', sans-serif;
+}
+
+.error-page h1 {
+    font-size: 48px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.error-page p {
+    font-size: 24px;
+    margin-bottom: 30px;
+}
+
+.error-page .btn {
+    font-size: 18px;
+    padding: 12px 24px;
+    color: #fff;
+    background-color: #007bff;
+    border: none;
+    border-radius: 5px;
+    transition: background-color 0.2s;
+}
+
+.error-page .btn:hover {
+    background-color: #0056b3;
+}
+
+.error-page .btn:focus {
+    outline: none;
+    box-shadow: none;
+}
