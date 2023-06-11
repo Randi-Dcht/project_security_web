@@ -148,7 +148,7 @@ const UserPage = () => {
     });
 
     const reader = new FileReader();
-    reader.onload = () => {
+    reader.onload = async () => {
 
       const wordArray = CryptoJS.lib.WordArray.create(reader.result);           // Convert: ArrayBuffer -> WordArray
       const encrypted = CryptoJS.AES.encrypt(wordArray, key.toString()).toString();        // Encryption: I: WordArray -> O: -> Base64 encoded string (OpenSSL-format)
@@ -162,10 +162,34 @@ const UserPage = () => {
       a.download = filename;
       a.click();
       window.URL.revokeObjectURL(url);
+
+      const cryptFileName = encryptText(file.name.substr(0, file.name.length - 4), key.toString());
+      const formData = new FormData();
+      formData.append("file", new File([fileEnc], cryptFileName));
+
+      try {
+        const response = await fetch('https://localhost:1026/files/upload/', {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            'Content-type': 'multipart/form-data',
+          },
+          file: formData,
+          name: cryptFileName,
+        });
+
+        if (response.ok) {
+          alert("Fichier uploadé avec succès !");
+        } else {
+          console.error('Erreur lors de l envoi du fichier : ', response.statusText);
+        }
+
+      } catch (error) {
+        console.error('Erreur lors de la requête HTTPS:', error);
+        window.location.href = '/error';
+      }
     };
     reader.readAsArrayBuffer(document.querySelector('input').files[0]);
-
-    const cryptFileName = encryptText(file.name.substr(0,file.name.length - 4),key.toString());
 
     localStorage.setItem("key", key.toString());
   };
