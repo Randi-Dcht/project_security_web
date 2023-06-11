@@ -32,6 +32,8 @@ class DataValidator
             preg_match($this->patternXss, json_encode($data)))
         {
             $this->logger->error('DataValidator: ' . json_encode($data));
+            // TODO error with user null pointer
+            //$this->getUser()->addBan();
         }
     }
 }
