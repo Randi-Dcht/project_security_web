@@ -84,3 +84,56 @@ update
 ### for check security in backend:
 
 > symfony check:security
+
+### TODO list :
+
+## Patient :
+
+- [x] Inscription
+- [x] Un patient peut ajouter un médecin à sa liste de médecins nommés
+- [x] Un patient peut supprimer un médecin de sa liste de médecins nommés
+- [x] Les patients peuvent consulter leurs propres dossiers médicaux
+- [x] Les patients peuvent consulter les médecins qui leur sont nommés
+- [ ] Personne d'autre n'a accès à ces dossiers médicaux
+- [x] Un patient peut soumettre un fichier au serveur pour qu'il fasse partie de son dossier médical
+- [x] Un patient peut supprimer un fichier de son dossier médical
+
+## Doctor :
+
+Inscription :
+- [x] Inscription en tant qu'utilisateur
+- [ ] Validation par l'administrateur
+
+Ajout patient :
+- [x] Le médecin peut ajouter un patient à sa liste de patients nommés
+- [ ] Le patient doit valider la demande d'ajout
+
+Suppression patient :
+- [x] Le médecin peut supprimer un patient de sa liste de patients nommés
+- [ ] Le patient doit valider la demande de suppression
+
+Ajout fichier dans dossier médical d'un patient :
+- [ ] Le médecin peut ajouter un fichier au dossier médical d'un patient
+- [ ] Le patient doit valider la demande d'ajout
+
+Suppression fichier d'un dossier médical d'un patient :
+- [ ] Le médecin peut supprimer un fichier du dossier médical d'un patient
+- [ ] Le patient doit valider la demande de suppression
+
+## Admin :
+
+Inscription :
+- [x] Inscription en tant qu'utilisateur
+- [ ] Validation par l'administrateur
+- [x] Les administrateurs peuvent également supprimer les utilisateurs.
+
+## System :
+
+- [x] Fournir un mécanisme pour le transférer "en toute sécurité" et vérifier sa propriété. (OK avec les certificats serveurs et utilisateurs)
+- [x] Les utilisateurs ont des attributs spécifiques pour leur communication sécurisée avec le serveur, tels que des clés. (OK, clé asymétrique pour le client, clé privée stockée localement, clé publique stockée sur le serveur)
+- [x] Un utilisateur peut vérifier l'authenticité du serveur (OK avec le certificat du site). Des informations d'identification doivent être générées pour l'utilisateur (certificat généré à partir de l'adresse e-mail, qui sert d'authentificateur combiné avec la clé privée générée).
+- [x] L'utilisateur peut se connecter au système en fournissant ses informations d'identification (OK, il fournit le certificat implicitement)
+- [ ] Un utilisateur peut, à tout moment, modifier ses informations d'identification et toute information qu'il utilise pour communiquer en toute sécurité avec le serveur (terminer la page changeInfo)
+- [x] Les utilisateurs peuvent se connecter à partir de différents appareils (OK, il suffit de partager le certificat sur les autres appareils)
+
+
