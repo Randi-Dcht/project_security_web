@@ -5,17 +5,6 @@
 As discussed in class, this repository own the projects for 5 students (3 presentation groups)
 due to 11/6 (submit via git)
 
-### Group 1
-- Alessandro Spinosi [200215]
-
-### Group 2
-- Guillaume Kerckhofs [191963]
-- Samain Clément [200512]
-
-### Group 3
-- Randy Dochot [190134]
-- Alix Declerck [192774]
-
 ## How to build the project :
 (we recommend here to either provide a makefile,
 or a shell script to install missing dependencies, compile the project and run relevant
